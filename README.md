@@ -1,7 +1,7 @@
 # Sistema de Gestão e Reserva de Espaços para Eventos — Maputo
 
 > **Disciplina:** Engenharia de Software · **Curso:** ETSI 4º Ano · **Avaliação:** Segunda Avaliação  
-> **Tema:** Grupo III — Desenvolvimento de Sistema de Gestão e Reserva de Espaços para Eventos na Cidade de Maputo  
+> **Tema:** Azarias Mahumane — Desenvolvimento de Sistema de Gestão e Reserva de Espaços para Eventos na Cidade de Maputo  
 > **Data de entrega:** 05/06/2026
 
 ---
@@ -99,7 +99,7 @@ Ao iniciar pela primeira vez, é criado **apenas** o utilizador administrador:
 
 | Perfil | Email | Senha inicial |
 |---|---|---|
-| ADMIN | admin@reservas.mz | **ALTERE_ESTA_SENHA** |
+| ADMIN | admin@reservas.mz | **engenharia de software2026** |
 
 > ⚠️ **IMPORTANTE:** Altere a senha imediatamente após o primeiro login via `PUT /auth/senha`.
 
@@ -217,7 +217,7 @@ Content-Type: application/json
 
 {
   "email": "admin@reservas.mz",
-  "senha": "ALTERE_ESTA_SENHA"
+  "senha": "engenharia de software2026"
 }
 ```
 
@@ -228,7 +228,7 @@ Authorization: Bearer <token>
 Content-Type: application/json
 
 {
-  "senhaActual": "ALTERE_ESTA_SENHA",
+  "senhaActual": "engenharia de software2026",
   "novaSenha": "MinhaNovaS3nh@"
 }
 ```
@@ -276,13 +276,11 @@ Content-Type: application/json
 
 ---
 
-## Grupo III — Participação
+## Participação
 
 | Nome | Participação |
 |---|---|
-| [Nome 1] | 100% |
-| [Nome 2] | 100% |
-| [Nome 3] | 100% |
+| Azarias Mahumane | 100% |
 
 ---
 
@@ -297,8 +295,9 @@ Content-Type: application/json
 
 ## Link do Repositório GitHub
 
-> Adicionar o link público aqui após publicar no GitHub.
-> Adicionar o email momademha@gmail.com como colaborador do repositório.
+https://github.com/mabasso10/reserva-espacos-maputo
+
+> Colaborador adicionado: momademha@gmail.com
 
 ---
 
