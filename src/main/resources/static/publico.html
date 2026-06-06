@@ -1,0 +1,1230 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ReservaEspaços Maputo — Encontre o espaço perfeito para o seu evento</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+<style>
+:root {
+  --ink: #0d0d0d;
+  --ink-soft: #3a3a3a;
+  --ink-muted: #7a7a7a;
+  --cream: #faf7f2;
+  --white: #ffffff;
+  --gold: #c9973a;
+  --gold-light: #f0d9a8;
+  --gold-pale: #fdf6e8;
+  --green: #1a5c3a;
+  --green-light: #e8f4ee;
+  --red: #c0392b;
+  --border: #e8e2d8;
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.06);
+  --shadow-md: 0 8px 32px rgba(0,0,0,0.10);
+  --shadow-lg: 0 24px 64px rgba(0,0,0,0.14);
+  --r: 12px;
+  --r-sm: 8px;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background: var(--cream);
+  color: var(--ink);
+  min-height: 100vh;
+}
+
+/* ── NAVBAR ── */
+.navbar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+  background: rgba(250,247,242,0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 clamp(16px, 4vw, 48px);
+  height: 68px;
+  display: flex; align-items: center; justify-content: space-between;
+  transition: box-shadow 0.3s;
+}
+.navbar.scrolled { box-shadow: var(--shadow-md); }
+
+.nav-brand {
+  display: flex; align-items: center; gap: 10px;
+  text-decoration: none;
+}
+.nav-brand-icon {
+  width: 38px; height: 38px;
+  background: var(--gold);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  color: white; font-size: 18px;
+}
+.nav-brand-text { display: flex; flex-direction: column; }
+.nav-brand-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 17px; font-weight: 700;
+  color: var(--ink); line-height: 1.1;
+}
+.nav-brand-city {
+  font-size: 10px; font-weight: 600; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--gold);
+}
+
+.nav-links {
+  display: flex; align-items: center; gap: 28px;
+  list-style: none;
+}
+.nav-links a {
+  text-decoration: none; color: var(--ink-soft);
+  font-size: 14px; font-weight: 500;
+  transition: color 0.2s;
+}
+.nav-links a:hover { color: var(--gold); }
+
+.nav-cta { display: flex; gap: 10px; align-items: center; }
+.btn-nav-ghost {
+  padding: 8px 18px; border-radius: 8px;
+  border: 1.5px solid var(--border);
+  background: transparent; cursor: pointer;
+  font-family: inherit; font-size: 13px; font-weight: 600;
+  color: var(--ink-soft);
+  transition: all 0.2s; text-decoration: none;
+  display: inline-flex; align-items: center;
+}
+.btn-nav-ghost:hover { border-color: var(--ink); color: var(--ink); }
+.btn-nav-fill {
+  padding: 9px 20px; border-radius: 8px;
+  background: var(--gold); border: none; cursor: pointer;
+  font-family: inherit; font-size: 13px; font-weight: 700;
+  color: white; transition: all 0.2s; text-decoration: none;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.btn-nav-fill:hover { background: #b8852d; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(201,151,58,0.35); }
+
+/* ── HERO ── */
+.hero {
+  padding-top: 68px;
+  background: linear-gradient(160deg, #0d2818 0%, #1a5c3a 50%, #2d8a5a 100%);
+  position: relative; overflow: hidden;
+  min-height: 88vh;
+  display: flex; align-items: center;
+}
+.hero-bg-pattern {
+  position: absolute; inset: 0;
+  background-image: radial-gradient(circle at 20% 80%, rgba(201,151,58,0.15) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(255,255,255,0.05) 0%, transparent 40%);
+  pointer-events: none;
+}
+.hero-grid {
+  position: absolute; inset: 0;
+  background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-size: 60px 60px;
+  pointer-events: none;
+}
+
+.hero-inner {
+  max-width: 1200px; margin: 0 auto; padding: 80px clamp(16px,4vw,48px);
+  display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center;
+  width: 100%;
+}
+
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(201,151,58,0.2); border: 1px solid rgba(201,151,58,0.4);
+  color: var(--gold-light); padding: 6px 14px; border-radius: 100px;
+  font-size: 12px; font-weight: 700; letter-spacing: 0.08em;
+  text-transform: uppercase; margin-bottom: 24px;
+}
+.hero-badge i { font-size: 10px; }
+
+.hero-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(38px, 5vw, 60px);
+  font-weight: 900; line-height: 1.1;
+  color: white; margin-bottom: 20px;
+}
+.hero-title span { color: var(--gold-light); }
+
+.hero-sub {
+  color: rgba(255,255,255,0.72); font-size: 17px; line-height: 1.7;
+  margin-bottom: 36px; max-width: 480px;
+}
+
+.hero-stats {
+  display: flex; gap: 28px; margin-bottom: 40px;
+}
+.hero-stat { display: flex; flex-direction: column; gap: 2px; }
+.hero-stat-num {
+  font-family: 'Playfair Display', serif;
+  font-size: 26px; font-weight: 700; color: var(--gold-light);
+}
+.hero-stat-label { font-size: 12px; color: rgba(255,255,255,0.55); font-weight: 500; }
+
+.hero-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+.btn-hero-primary {
+  padding: 14px 28px; background: var(--gold); border: none;
+  border-radius: 10px; cursor: pointer; font-family: inherit;
+  font-size: 15px; font-weight: 700; color: white;
+  display: inline-flex; align-items: center; gap: 8px;
+  transition: all 0.2s; text-decoration: none;
+}
+.btn-hero-primary:hover { background: #b8852d; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(201,151,58,0.4); }
+.btn-hero-ghost {
+  padding: 14px 28px; background: rgba(255,255,255,0.1);
+  border: 1.5px solid rgba(255,255,255,0.25);
+  border-radius: 10px; cursor: pointer; font-family: inherit;
+  font-size: 15px; font-weight: 600; color: white;
+  display: inline-flex; align-items: center; gap: 8px;
+  transition: all 0.2s; text-decoration: none;
+}
+.btn-hero-ghost:hover { background: rgba(255,255,255,0.18); }
+
+/* Hero visual */
+.hero-visual { position: relative; }
+.hero-card-stack { position: relative; height: 360px; }
+.hero-card-back {
+  position: absolute; top: 32px; right: 0;
+  width: 82%; border-radius: 20px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  height: 280px;
+  transform: rotate(3deg);
+}
+.hero-card-main {
+  position: absolute; top: 0; left: 0;
+  width: 90%; border-radius: 20px;
+  background: rgba(255,255,255,0.12);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.2);
+  padding: 24px; overflow: hidden;
+}
+.hero-card-img {
+  width: 100%; height: 140px; border-radius: 12px;
+  background: linear-gradient(135deg, rgba(201,151,58,0.3), rgba(45,138,90,0.4));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 48px; color: rgba(255,255,255,0.5);
+  margin-bottom: 16px;
+}
+.hero-card-info { color: white; }
+.hero-card-tipo {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--gold-light);
+  background: rgba(201,151,58,0.2); padding: 3px 10px;
+  border-radius: 100px; display: inline-block; margin-bottom: 8px;
+}
+.hero-card-nome {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px; font-weight: 700; margin-bottom: 6px;
+}
+.hero-card-meta {
+  display: flex; gap: 14px; font-size: 12px;
+  color: rgba(255,255,255,0.6);
+}
+.hero-card-avail {
+  position: absolute; top: 20px; right: 20px;
+  background: #1a8a4a; color: white;
+  padding: 4px 12px; border-radius: 100px;
+  font-size: 11px; font-weight: 700;
+}
+
+/* ── SEARCH / FILTER BAR ── */
+.search-section {
+  background: white;
+  border-bottom: 1px solid var(--border);
+  padding: 20px clamp(16px,4vw,48px);
+  position: sticky; top: 68px; z-index: 900;
+  box-shadow: var(--shadow-sm);
+}
+.search-bar {
+  max-width: 1200px; margin: 0 auto;
+  display: flex; gap: 10px; flex-wrap: wrap; align-items: center;
+}
+.search-input-wrap {
+  flex: 1; min-width: 220px;
+  position: relative;
+}
+.search-input-wrap i {
+  position: absolute; left: 14px; top: 50%;
+  transform: translateY(-50%);
+  color: var(--ink-muted); font-size: 14px;
+}
+.search-input {
+  width: 100%; padding: 11px 14px 11px 40px;
+  border: 1.5px solid var(--border); border-radius: var(--r-sm);
+  font-family: inherit; font-size: 14px; color: var(--ink);
+  background: var(--cream); outline: none;
+  transition: border-color 0.2s;
+}
+.search-input:focus { border-color: var(--gold); background: white; }
+.filter-select {
+  padding: 11px 14px; border: 1.5px solid var(--border);
+  border-radius: var(--r-sm); font-family: inherit;
+  font-size: 14px; color: var(--ink); background: var(--cream);
+  outline: none; cursor: pointer; transition: border-color 0.2s;
+  min-width: 150px;
+}
+.filter-select:focus { border-color: var(--gold); background: white; }
+.search-count {
+  font-size: 13px; color: var(--ink-muted); white-space: nowrap;
+  font-weight: 500;
+}
+
+/* ── MAIN CONTENT ── */
+.main {
+  max-width: 1200px; margin: 0 auto;
+  padding: 48px clamp(16px,4vw,48px);
+}
+
+.section-header {
+  display: flex; align-items: baseline;
+  justify-content: space-between; margin-bottom: 32px;
+}
+.section-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 28px; font-weight: 700;
+}
+.section-sub { color: var(--ink-muted); font-size: 14px; margin-top: 4px; }
+
+/* ── CARDS GRID ── */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 24px;
+}
+
+.espaco-card {
+  background: white; border-radius: 16px;
+  border: 1px solid var(--border);
+  overflow: hidden; transition: all 0.25s;
+  display: flex; flex-direction: column;
+  box-shadow: var(--shadow-sm);
+}
+.espaco-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--gold);
+}
+.espaco-card.indisponivel { opacity: 0.72; }
+.espaco-card.indisponivel:hover { transform: none; }
+
+.card-img {
+  height: 180px; position: relative; overflow: hidden;
+  background: linear-gradient(135deg, #e8f4ee, #d4ead9);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 56px; color: #7abf94;
+}
+.card-img-emoji { font-size: 56px; line-height: 1; }
+.card-tipo-badge {
+  position: absolute; top: 12px; left: 12px;
+  padding: 4px 12px; border-radius: 100px;
+  font-size: 11px; font-weight: 700; letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.badge-casamento { background: #fce4ec; color: #c2185b; }
+.badge-conferencia { background: #e3f2fd; color: #1565c0; }
+.badge-festa { background: #fff3e0; color: #e65100; }
+.badge-reuniao { background: #f3e5f5; color: #6a1b9a; }
+.badge-outro { background: #e8f5e9; color: #1b5e20; }
+.card-avail-badge {
+  position: absolute; top: 12px; right: 12px;
+  padding: 4px 12px; border-radius: 100px;
+  font-size: 11px; font-weight: 700;
+}
+.avail-sim { background: #e8f5e9; color: #1b5e20; }
+.avail-nao { background: #ffebee; color: #b71c1c; }
+
+.card-body { padding: 20px; flex: 1; display: flex; flex-direction: column; }
+.card-nome {
+  font-family: 'Playfair Display', serif;
+  font-size: 18px; font-weight: 700; margin-bottom: 6px;
+  color: var(--ink);
+}
+.card-bairro {
+  display: flex; align-items: center; gap: 5px;
+  color: var(--ink-muted); font-size: 13px; margin-bottom: 10px;
+}
+.card-bairro i { color: var(--gold); font-size: 12px; }
+.card-desc {
+  font-size: 13px; color: var(--ink-soft); line-height: 1.6;
+  margin-bottom: 16px; flex: 1;
+  display: -webkit-box; -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical; overflow: hidden;
+}
+.card-meta {
+  display: flex; gap: 16px;
+  padding: 12px 0; border-top: 1px solid var(--border);
+  margin-bottom: 16px;
+}
+.card-meta-item {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 13px; color: var(--ink-soft); font-weight: 500;
+}
+.card-meta-item i { color: var(--gold); font-size: 12px; }
+.card-price {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px; font-weight: 700; color: var(--green);
+}
+.card-price span { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12px; color: var(--ink-muted); font-weight: 400; }
+
+.card-footer {
+  padding: 14px 20px;
+  border-top: 1px solid var(--border);
+  display: flex; gap: 8px;
+}
+.btn-reservar {
+  flex: 1; padding: 10px; border-radius: 8px;
+  background: var(--gold); border: none; cursor: pointer;
+  font-family: inherit; font-size: 13px; font-weight: 700;
+  color: white; transition: all 0.2s;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+.btn-reservar:hover { background: #b8852d; }
+.btn-reservar:disabled { background: #ccc; cursor: not-allowed; }
+.btn-detalhes {
+  padding: 10px 14px; border-radius: 8px;
+  background: var(--cream); border: 1.5px solid var(--border);
+  cursor: pointer; font-family: inherit; font-size: 13px;
+  font-weight: 600; color: var(--ink-soft); transition: all 0.2s;
+}
+.btn-detalhes:hover { border-color: var(--ink); color: var(--ink); }
+
+/* ── EMPTY / LOADING ── */
+.state-box {
+  grid-column: 1 / -1; text-align: center;
+  padding: 80px 20px; color: var(--ink-muted);
+}
+.state-box i { font-size: 48px; margin-bottom: 16px; display: block; }
+.state-box h3 { font-size: 20px; font-weight: 600; margin-bottom: 8px; color: var(--ink-soft); }
+.state-box p { font-size: 14px; }
+
+.spinner { animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── HOW IT WORKS ── */
+.how-section {
+  background: var(--gold-pale); padding: 72px clamp(16px,4vw,48px);
+  border-top: 1px solid var(--gold-light);
+  border-bottom: 1px solid var(--gold-light);
+}
+.how-inner { max-width: 1200px; margin: 0 auto; }
+.how-title {
+  text-align: center;
+  font-family: 'Playfair Display', serif;
+  font-size: 32px; font-weight: 700; margin-bottom: 8px;
+}
+.how-sub { text-align: center; color: var(--ink-muted); margin-bottom: 48px; font-size: 15px; }
+.how-steps {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 28px;
+}
+.how-step {
+  background: white; border-radius: 16px;
+  padding: 28px; text-align: center;
+  border: 1px solid var(--gold-light);
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s;
+}
+.how-step:hover { transform: translateY(-3px); }
+.how-step-num {
+  width: 48px; height: 48px; border-radius: 50%;
+  background: var(--gold); color: white;
+  font-family: 'Playfair Display', serif;
+  font-size: 20px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 16px;
+}
+.how-step h4 { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+.how-step p { font-size: 13px; color: var(--ink-muted); line-height: 1.6; }
+
+/* ── MODAL ── */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 2000;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.25s;
+}
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+.modal-box {
+  background: white; border-radius: 20px;
+  width: 100%; max-width: 520px;
+  max-height: 90vh; overflow-y: auto;
+  box-shadow: var(--shadow-lg);
+  transform: translateY(20px);
+  transition: transform 0.25s;
+}
+.modal-overlay.open .modal-box { transform: translateY(0); }
+.modal-box-header {
+  padding: 24px 28px 0;
+  display: flex; align-items: flex-start; justify-content: space-between;
+  border-bottom: 1px solid var(--border); padding-bottom: 18px;
+}
+.modal-box-header h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px; font-weight: 700;
+}
+.modal-close {
+  background: none; border: none; cursor: pointer;
+  color: var(--ink-muted); font-size: 18px; padding: 4px;
+  transition: color 0.2s;
+}
+.modal-close:hover { color: var(--ink); }
+.modal-box-body { padding: 24px 28px; }
+.modal-espaco-info {
+  background: var(--cream); border-radius: 12px;
+  padding: 16px; margin-bottom: 24px;
+  border: 1px solid var(--border);
+}
+.modal-espaco-nome {
+  font-family: 'Playfair Display', serif;
+  font-size: 18px; font-weight: 700; margin-bottom: 4px;
+}
+.modal-espaco-meta { display: flex; gap: 16px; flex-wrap: wrap; }
+.modal-espaco-meta span { font-size: 13px; color: var(--ink-muted); display: flex; align-items: center; gap: 4px; }
+.modal-espaco-meta i { color: var(--gold); }
+
+.form-group { margin-bottom: 18px; }
+.form-label { font-size: 13px; font-weight: 600; margin-bottom: 6px; display: block; color: var(--ink-soft); }
+.form-input, .form-select {
+  width: 100%; padding: 11px 14px;
+  border: 1.5px solid var(--border); border-radius: 8px;
+  font-family: inherit; font-size: 14px; color: var(--ink);
+  background: var(--cream); outline: none;
+  transition: border-color 0.2s;
+}
+.form-input:focus, .form-select:focus { border-color: var(--gold); background: white; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.form-note { font-size: 12px; color: var(--ink-muted); margin-top: 4px; }
+
+.modal-alert {
+  padding: 12px 14px; border-radius: 8px; font-size: 14px;
+  margin-bottom: 16px; display: none;
+}
+.modal-alert.error { background: #ffebee; color: var(--red); border: 1px solid #ffcdd2; display: block; }
+.modal-alert.success { background: var(--green-light); color: var(--green); border: 1px solid #c8e6c9; display: block; }
+
+.modal-box-footer {
+  padding: 0 28px 24px;
+  display: flex; gap: 10px; justify-content: flex-end;
+}
+.btn-ghost {
+  padding: 11px 22px; border-radius: 8px;
+  background: transparent; border: 1.5px solid var(--border);
+  cursor: pointer; font-family: inherit; font-size: 14px;
+  font-weight: 600; color: var(--ink-soft); transition: all 0.2s;
+}
+.btn-ghost:hover { border-color: var(--ink); color: var(--ink); }
+.btn-primary {
+  padding: 11px 22px; border-radius: 8px;
+  background: var(--gold); border: none;
+  cursor: pointer; font-family: inherit; font-size: 14px;
+  font-weight: 700; color: white; transition: all 0.2s;
+  display: flex; align-items: center; gap: 8px;
+}
+.btn-primary:hover { background: #b8852d; }
+.btn-primary:disabled { background: #ccc; cursor: not-allowed; }
+
+/* ── DETAIL MODAL ── */
+.detail-img {
+  height: 200px; border-radius: 12px;
+  background: linear-gradient(135deg, #e8f4ee, #d4ead9);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 72px; margin-bottom: 20px;
+}
+.detail-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 24px; font-weight: 700; margin-bottom: 8px;
+}
+.detail-meta { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
+.detail-badge {
+  padding: 4px 12px; border-radius: 100px;
+  font-size: 12px; font-weight: 700;
+}
+.detail-desc { font-size: 14px; color: var(--ink-soft); line-height: 1.7; margin-bottom: 20px; }
+.detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+.detail-item {
+  background: var(--cream); border-radius: 10px;
+  padding: 14px; border: 1px solid var(--border);
+}
+.detail-item-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-muted); margin-bottom: 4px; }
+.detail-item-val { font-size: 16px; font-weight: 700; color: var(--ink); }
+.detail-item-val.price { color: var(--green); font-family: 'Playfair Display', serif; font-size: 20px; }
+
+/* ── FOOTER ── */
+.footer {
+  background: var(--ink); color: rgba(255,255,255,0.55);
+  padding: 48px clamp(16px,4vw,48px) 28px;
+}
+.footer-inner {
+  max-width: 1200px; margin: 0 auto;
+  display: grid; grid-template-columns: 2fr 1fr 1fr;
+  gap: 40px; margin-bottom: 40px;
+}
+.footer-brand-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px; font-weight: 700; color: white; margin-bottom: 10px;
+}
+.footer-brand-desc { font-size: 13px; line-height: 1.7; }
+.footer-col-title {
+  font-size: 12px; font-weight: 700; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--gold-light); margin-bottom: 14px;
+}
+.footer-links { list-style: none; }
+.footer-links li { margin-bottom: 8px; }
+.footer-links a { color: rgba(255,255,255,0.55); text-decoration: none; font-size: 13px; transition: color 0.2s; }
+.footer-links a:hover { color: white; }
+.footer-bottom {
+  border-top: 1px solid rgba(255,255,255,0.1);
+  padding-top: 20px; text-align: center;
+  font-size: 12px;
+}
+
+/* ── TOAST ── */
+.toast {
+  position: fixed; bottom: 24px; right: 24px; z-index: 9999;
+  background: var(--ink); color: white;
+  padding: 14px 20px; border-radius: 12px;
+  box-shadow: var(--shadow-lg); font-size: 14px; font-weight: 500;
+  display: flex; align-items: center; gap: 10px;
+  transform: translateY(80px); opacity: 0;
+  transition: all 0.3s; pointer-events: none;
+  max-width: 340px;
+}
+.toast.show { transform: translateY(0); opacity: 1; pointer-events: all; }
+.toast.success { background: var(--green); }
+.toast.error { background: var(--red); }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 768px) {
+  .hero-inner { grid-template-columns: 1fr; }
+  .hero-visual { display: none; }
+  .hero-stats { gap: 20px; }
+  .footer-inner { grid-template-columns: 1fr; }
+  .nav-links { display: none; }
+  .form-row { grid-template-columns: 1fr; }
+  .detail-grid { grid-template-columns: 1fr; }
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  from { opacity:0; transform: translateY(24px); }
+  to { opacity:1; transform: translateY(0); }
+}
+.card-anim {
+  animation: fadeInUp 0.4s ease both;
+}
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar" id="navbar">
+  <a href="#" class="nav-brand">
+    <div class="nav-brand-icon"><i class="fa-solid fa-building-columns"></i></div>
+    <div class="nav-brand-text">
+      <span class="nav-brand-name">ReservaEspaços</span>
+      <span class="nav-brand-city">Maputo</span>
+    </div>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#espacos">Espaços</a></li>
+    <li><a href="#como-funciona">Como funciona</a></li>
+  </ul>
+  <div class="nav-cta">
+    <a href="index.html" class="btn-nav-ghost">Entrar</a>
+    <a href="#espacos" class="btn-nav-fill"><i class="fa-solid fa-calendar-plus"></i> Reservar agora</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg-pattern"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-inner">
+    <div class="hero-content">
+      <div class="hero-badge"><i class="fa-solid fa-map-pin"></i> Maputo, Moçambique</div>
+      <h1 class="hero-title">O espaço <span>perfeito</span> para o seu evento</h1>
+      <p class="hero-sub">Encontre e reserve salas, auditórios, salões e muito mais. Disponibilidade em tempo real, confirmação imediata.</p>
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <span class="hero-stat-num" id="stat-total">—</span>
+          <span class="hero-stat-label">Espaços</span>
+        </div>
+        <div class="hero-stat">
+          <span class="hero-stat-num" id="stat-disp">—</span>
+          <span class="hero-stat-label">Disponíveis hoje</span>
+        </div>
+        <div class="hero-stat">
+          <span class="hero-stat-num">5+</span>
+          <span class="hero-stat-label">Tipos de evento</span>
+        </div>
+      </div>
+      <div class="hero-actions">
+        <a href="#espacos" class="btn-hero-primary"><i class="fa-solid fa-search"></i> Ver espaços disponíveis</a>
+        <a href="index.html" class="btn-hero-ghost"><i class="fa-solid fa-user"></i> Fazer login</a>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="hero-card-stack">
+        <div class="hero-card-back"></div>
+        <div class="hero-card-main" id="hero-showcase">
+          <div class="hero-card-img"><i class="fa-solid fa-building"></i></div>
+          <div class="hero-card-info">
+            <div class="hero-card-tipo">A carregar…</div>
+            <div class="hero-card-nome">—</div>
+            <div class="hero-card-meta">
+              <span><i class="fa-solid fa-users"></i> —</span>
+              <span><i class="fa-solid fa-tag"></i> —</span>
+            </div>
+          </div>
+          <div class="hero-card-avail">Disponível</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SEARCH BAR -->
+<div class="search-section">
+  <div class="search-bar">
+    <div class="search-input-wrap">
+      <i class="fa-solid fa-magnifying-glass"></i>
+      <input type="text" id="pesquisa" class="search-input" placeholder="Pesquisar por nome ou bairro…" oninput="filtrar()"/>
+    </div>
+    <select id="fil-tipo" class="filter-select" onchange="filtrar()">
+      <option value="">Todos os tipos</option>
+      <option value="Casamento">Casamento</option>
+      <option value="Conferencia">Conferência</option>
+      <option value="Festa">Festa</option>
+      <option value="Reuniao">Reunião</option>
+      <option value="Outro">Outro</option>
+    </select>
+    <select id="fil-bairro" class="filter-select" onchange="filtrar()">
+      <option value="">Todos os bairros</option>
+    </select>
+    <select id="fil-disp" class="filter-select" onchange="filtrar()">
+      <option value="">Todos</option>
+      <option value="true">Disponíveis</option>
+      <option value="false">Indisponíveis</option>
+    </select>
+    <span class="search-count" id="count-label"></span>
+  </div>
+</div>
+
+<!-- CARDS -->
+<main class="main" id="espacos">
+  <div class="section-header">
+    <div>
+      <h2 class="section-title">Espaços para eventos</h2>
+      <p class="section-sub">Escolha o espaço ideal e solicite a sua reserva</p>
+    </div>
+  </div>
+  <div class="cards-grid" id="cards-grid">
+    <div class="state-box">
+      <i class="fa-solid fa-spinner spinner"></i>
+      <h3>A carregar espaços…</h3>
+      <p>Aguarde um momento</p>
+    </div>
+  </div>
+</main>
+
+<!-- HOW IT WORKS -->
+<section class="how-section" id="como-funciona">
+  <div class="how-inner">
+    <h2 class="how-title">Como funciona?</h2>
+    <p class="how-sub">Reservar um espaço em Maputo nunca foi tão simples.</p>
+    <div class="how-steps">
+      <div class="how-step">
+        <div class="how-step-num">1</div>
+        <h4>Explore os espaços</h4>
+        <p>Filtre por tipo de evento, bairro e disponibilidade para encontrar o espaço ideal.</p>
+      </div>
+      <div class="how-step">
+        <div class="how-step-num">2</div>
+        <h4>Crie a sua conta</h4>
+        <p>Registe-se gratuitamente como cliente para poder efectuar reservas.</p>
+      </div>
+      <div class="how-step">
+        <div class="how-step-num">3</div>
+        <h4>Solicite a reserva</h4>
+        <p>Escolha a data, hora e número de participantes. Confirme os detalhes.</p>
+      </div>
+      <div class="how-step">
+        <div class="how-step-num">4</div>
+        <h4>Efectue o pagamento</h4>
+        <p>Pague e receba a confirmação da sua reserva. Tudo no mesmo lugar.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div>
+      <div class="footer-brand-name">ReservaEspaços Maputo</div>
+      <p class="footer-brand-desc">A plataforma de referência para gestão e reserva de espaços para eventos na cidade de Maputo, Moçambique.</p>
+    </div>
+    <div>
+      <div class="footer-col-title">Sistema</div>
+      <ul class="footer-links">
+        <li><a href="#espacos">Ver espaços</a></li>
+        <li><a href="index.html">Entrar / Registar</a></li>
+        <li><a href="#como-funciona">Como funciona</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-col-title">Contacto</div>
+      <ul class="footer-links">
+        <li><a href="#">Maputo, Moçambique</a></li>
+        <li><a href="#">reservas@maputo.mz</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    &copy; 2026 ReservaEspaços Maputo — Universidade Joaquim Chissano
+  </div>
+</footer>
+
+<!-- MODAL DETALHES -->
+<div class="modal-overlay" id="modal-detail">
+  <div class="modal-box">
+    <div class="modal-box-header">
+      <h3>Detalhes do Espaço</h3>
+      <button class="modal-close" onclick="fecharDetalhe()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-box-body" id="detail-body"></div>
+    <div class="modal-box-footer">
+      <button class="btn-ghost" onclick="fecharDetalhe()">Fechar</button>
+      <button class="btn-primary" id="btn-reservar-detail" onclick="reservarFromDetail()">
+        <i class="fa-solid fa-calendar-plus"></i> Reservar este espaço
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL RESERVA -->
+<div class="modal-overlay" id="modal-reserva">
+  <div class="modal-box">
+    <div class="modal-box-header">
+      <h3>Solicitar Reserva</h3>
+      <button class="modal-close" onclick="fecharReserva()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-box-body">
+      <div class="modal-espaco-info" id="reserva-espaco-info"></div>
+      <div class="modal-alert" id="reserva-alert"></div>
+
+      <!-- Se não estiver logado, mostrar aviso -->
+      <div id="reserva-login-aviso" style="display:none; text-align:center; padding:20px 0;">
+        <i class="fa-solid fa-lock" style="font-size:40px; color:var(--gold); margin-bottom:12px; display:block;"></i>
+        <h4 style="margin-bottom:8px;">Autenticação necessária</h4>
+        <p style="font-size:14px; color:var(--ink-muted); margin-bottom:20px;">Para efectuar uma reserva, precisa de ter conta e estar autenticado.</p>
+        <a href="index.html" class="btn-primary" style="justify-content:center; display:inline-flex;">
+          <i class="fa-solid fa-sign-in-alt"></i> Entrar na minha conta
+        </a>
+      </div>
+
+      <!-- Formulário de reserva (só para logados) -->
+      <div id="reserva-form">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Data do Evento *</label>
+            <input type="date" id="r-data" class="form-input"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Nº de Participantes *</label>
+            <input type="number" id="r-participantes" class="form-input" min="1" placeholder="ex: 50"/>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Hora de início *</label>
+            <input type="time" id="r-inicio" class="form-input"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Hora de fim *</label>
+            <input type="time" id="r-fim" class="form-input"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Valor estimado</label>
+          <div id="r-valor" style="font-family:'Playfair Display',serif; font-size:24px; font-weight:700; color:var(--green); padding:8px 0;">— MZN</div>
+          <p class="form-note">Calculado com base no preço/hora e duração do evento.</p>
+        </div>
+      </div>
+    </div>
+    <div class="modal-box-footer" id="reserva-footer">
+      <button class="btn-ghost" onclick="fecharReserva()">Cancelar</button>
+      <button class="btn-primary" id="btn-confirmar-reserva" onclick="confirmarReserva()">
+        <i class="fa-solid fa-calendar-check"></i> Confirmar Reserva
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+const API_BASE = '';
+let todosEspacos = [];
+let espacoSelecionado = null;
+
+// ── Navbar scroll effect ──
+window.addEventListener('scroll', () => {
+  document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 20);
+});
+
+// ── Carregar espaços da API ──
+async function carregarEspacos() {
+  try {
+    const res = await fetch(API_BASE + '/espaco/publico');
+    if (!res.ok) throw new Error('Erro ' + res.status);
+    todosEspacos = await res.json();
+  } catch(e) {
+    // Fallback: tentar endpoint normal (se estiver em modo dev)
+    try {
+      const res2 = await fetch(API_BASE + '/espaco');
+      if (res2.ok) { todosEspacos = await res2.json(); }
+      else { throw e; }
+    } catch(e2) {
+      // Dados de demonstração se API não estiver disponível
+      todosEspacos = getDemoData();
+    }
+  }
+  renderizarTudo();
+}
+
+function getDemoData() {
+  return [
+    {id:1, nomeEspaco:"Salão Maputo Internacional", bairro:"Sommerschield", tipoEvento:"Casamento", capacidade:300, precoReserva:15000, disponibilidade:true, descricao:"Elegante salão com vista para a Baía de Maputo, ideal para casamentos e eventos corporativos de luxo."},
+    {id:2, nomeEspaco:"Auditório Central UJC", bairro:"Polana", tipoEvento:"Conferencia", capacidade:200, precoReserva:8000, disponibilidade:true, descricao:"Auditório moderno com sistema de som e projeção profissional, perfeito para conferências e palestras."},
+    {id:3, nomeEspaco:"Espaço Verde Matola", bairro:"Matola A", tipoEvento:"Festa", capacidade:500, precoReserva:12000, disponibilidade:true, descricao:"Amplo espaço ao ar livre com jardim tropical, área coberta e estacionamento privativo."},
+    {id:4, nomeEspaco:"Sala Executiva Baixa", bairro:"Baixa", tipoEvento:"Reuniao", capacidade:30, precoReserva:3500, disponibilidade:false, descricao:"Sala de reuniões equipada com climatização, projetor e videoconferência. No coração da Baixa."},
+    {id:5, nomeEspaco:"Centro Cultural Lhanguene", bairro:"Lhanguene", tipoEvento:"Outro", capacidade:150, precoReserva:6000, disponibilidade:true, descricao:"Espaço cultural versátil para exposições, espetáculos, formações e eventos culturais diversos."},
+    {id:6, nomeEspaco:"Terraço Panorâmico Costa do Sol", bairro:"Costa do Sol", tipoEvento:"Casamento", capacidade:120, precoReserva:20000, disponibilidade:true, descricao:"Terraço com vista 360° para o Índico, atmosfera única para celebrações íntimas e inesquecíveis."}
+  ];
+}
+
+function renderizarTudo() {
+  // Stats no hero
+  const disponiveis = todosEspacos.filter(e => e.disponibilidade).length;
+  document.getElementById('stat-total').textContent = todosEspacos.length;
+  document.getElementById('stat-disp').textContent = disponiveis;
+
+  // Preencher filtro de bairros
+  const bairros = [...new Set(todosEspacos.map(e => e.bairro).filter(Boolean))].sort();
+  const selBairro = document.getElementById('fil-bairro');
+  bairros.forEach(b => {
+    const opt = document.createElement('option'); opt.value = b; opt.textContent = b;
+    selBairro.appendChild(opt);
+  });
+
+  // Showcase no hero
+  const primDisp = todosEspacos.find(e => e.disponibilidade) || todosEspacos[0];
+  if (primDisp) updateHeroShowcase(primDisp);
+
+  filtrar();
+}
+
+function updateHeroShowcase(e) {
+  const sc = document.getElementById('hero-showcase');
+  sc.querySelector('.hero-card-tipo').textContent = e.tipoEvento || 'Espaço';
+  sc.querySelector('.hero-card-nome').textContent = e.nomeEspaco;
+  const meta = sc.querySelectorAll('.hero-card-meta span');
+  if (meta[0]) meta[0].innerHTML = `<i class="fa-solid fa-users"></i> ${e.capacidade} pessoas`;
+  if (meta[1]) meta[1].innerHTML = `<i class="fa-solid fa-tag"></i> ${formatMZN(e.precoReserva)}/h`;
+}
+
+function filtrar() {
+  const q = document.getElementById('pesquisa').value.toLowerCase().trim();
+  const tipo = document.getElementById('fil-tipo').value;
+  const bairro = document.getElementById('fil-bairro').value;
+  const disp = document.getElementById('fil-disp').value;
+
+  const resultado = todosEspacos.filter(e => {
+    const matchQ = !q || `${e.nomeEspaco} ${e.bairro}`.toLowerCase().includes(q);
+    const matchTipo = !tipo || e.tipoEvento === tipo;
+    const matchBairro = !bairro || e.bairro === bairro;
+    const matchDisp = disp === '' || String(e.disponibilidade) === disp;
+    return matchQ && matchTipo && matchBairro && matchDisp;
+  });
+
+  document.getElementById('count-label').textContent =
+    resultado.length === 1 ? '1 espaço encontrado' : `${resultado.length} espaços encontrados`;
+
+  renderCards(resultado);
+}
+
+function renderCards(lista) {
+  const grid = document.getElementById('cards-grid');
+  if (!lista.length) {
+    grid.innerHTML = `
+      <div class="state-box">
+        <i class="fa-solid fa-building-circle-xmark"></i>
+        <h3>Nenhum espaço encontrado</h3>
+        <p>Tente ajustar os filtros de pesquisa.</p>
+      </div>`;
+    return;
+  }
+
+  grid.innerHTML = lista.map((e, i) => {
+    const tipoCls = {
+      'Casamento':'badge-casamento','Conferencia':'badge-conferencia',
+      'Festa':'badge-festa','Reuniao':'badge-reuniao','Outro':'badge-outro'
+    }[e.tipoEvento] || 'badge-outro';
+    const emoji = {
+      'Casamento':'💍','Conferencia':'🎤','Festa':'🎉',
+      'Reuniao':'🤝','Outro':'🏛️'
+    }[e.tipoEvento] || '🏢';
+
+    return `
+    <div class="espaco-card ${e.disponibilidade ? '' : 'indisponivel'} card-anim"
+         style="animation-delay:${i*0.06}s">
+      <div class="card-img">
+        <span class="card-img-emoji">${emoji}</span>
+        <span class="card-tipo-badge ${tipoCls}">${e.tipoEvento}</span>
+        <span class="card-avail-badge ${e.disponibilidade ? 'avail-sim' : 'avail-nao'}">
+          ${e.disponibilidade ? '✓ Disponível' : '✗ Indisponível'}
+        </span>
+      </div>
+      <div class="card-body">
+        <div class="card-nome">${e.nomeEspaco}</div>
+        <div class="card-bairro"><i class="fa-solid fa-location-dot"></i> ${e.bairro || 'Maputo'}</div>
+        <div class="card-desc">${e.descricao || 'Espaço disponível para eventos em Maputo.'}</div>
+        <div class="card-meta">
+          <div class="card-meta-item"><i class="fa-solid fa-users"></i> ${e.capacidade} pessoas</div>
+          <div class="card-meta-item" style="margin-left:auto;">
+            <div class="card-price">${formatMZN(e.precoReserva)} <span>/hora</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="card-footer">
+        <button class="btn-reservar" onclick="abrirReserva(${e.id})"
+          ${!e.disponibilidade ? 'disabled' : ''}>
+          <i class="fa-solid fa-calendar-plus"></i>
+          ${e.disponibilidade ? 'Reservar' : 'Indisponível'}
+        </button>
+        <button class="btn-detalhes" onclick="abrirDetalhe(${e.id})">
+          <i class="fa-solid fa-circle-info"></i>
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── Detalhe ──
+function abrirDetalhe(id) {
+  espacoSelecionado = todosEspacos.find(e => e.id === id);
+  if (!espacoSelecionado) return;
+  const e = espacoSelecionado;
+  const emoji = {'Casamento':'💍','Conferencia':'🎤','Festa':'🎉','Reuniao':'🤝','Outro':'🏛️'}[e.tipoEvento] || '🏢';
+  const tipoCls = {'Casamento':'badge-casamento','Conferencia':'badge-conferencia','Festa':'badge-festa','Reuniao':'badge-reuniao','Outro':'badge-outro'}[e.tipoEvento] || 'badge-outro';
+
+  document.getElementById('detail-body').innerHTML = `
+    <div class="detail-img">${emoji}</div>
+    <div class="detail-title">${e.nomeEspaco}</div>
+    <div class="detail-meta">
+      <span class="detail-badge ${tipoCls}">${e.tipoEvento}</span>
+      <span class="detail-badge ${e.disponibilidade ? 'avail-sim' : 'avail-nao'}">${e.disponibilidade ? 'Disponível' : 'Indisponível'}</span>
+    </div>
+    <p class="detail-desc">${e.descricao || 'Espaço disponível para eventos em Maputo.'}</p>
+    <div class="detail-grid">
+      <div class="detail-item">
+        <div class="detail-item-label">Bairro</div>
+        <div class="detail-item-val">${e.bairro || '—'}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-item-label">Capacidade</div>
+        <div class="detail-item-val">${e.capacidade} pessoas</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-item-label">Preço por hora</div>
+        <div class="detail-item-val price">${formatMZN(e.precoReserva)}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-item-label">Tipo de evento</div>
+        <div class="detail-item-val">${e.tipoEvento}</div>
+      </div>
+    </div>`;
+
+  const btnR = document.getElementById('btn-reservar-detail');
+  btnR.disabled = !e.disponibilidade;
+  btnR.textContent = e.disponibilidade ? 'Reservar este espaço' : 'Indisponível';
+  if (e.disponibilidade) {
+    btnR.innerHTML = '<i class="fa-solid fa-calendar-plus"></i> Reservar este espaço';
+  }
+
+  document.getElementById('modal-detail').classList.add('open');
+}
+function fecharDetalhe() { document.getElementById('modal-detail').classList.remove('open'); }
+function reservarFromDetail() {
+  fecharDetalhe();
+  if (espacoSelecionado) abrirReserva(espacoSelecionado.id);
+}
+
+// ── Reserva ──
+function abrirReserva(id) {
+  espacoSelecionado = todosEspacos.find(e => e.id === id);
+  if (!espacoSelecionado) return;
+  const e = espacoSelecionado;
+
+  // Info do espaço
+  document.getElementById('reserva-espaco-info').innerHTML = `
+    <div class="modal-espaco-nome">${e.nomeEspaco}</div>
+    <div class="modal-espaco-meta">
+      <span><i class="fa-solid fa-location-dot"></i> ${e.bairro}</span>
+      <span><i class="fa-solid fa-users"></i> até ${e.capacidade} pessoas</span>
+      <span><i class="fa-solid fa-tag"></i> ${formatMZN(e.precoReserva)}/h</span>
+    </div>`;
+
+  // Verificar se logado
+  const token = localStorage.getItem('token');
+  const formDiv = document.getElementById('reserva-form');
+  const avisoDivDiv = document.getElementById('reserva-login-aviso');
+  const footer = document.getElementById('reserva-footer');
+
+  if (!token) {
+    formDiv.style.display = 'none';
+    avisoDivDiv.style.display = 'block';
+    footer.style.display = 'none';
+  } else {
+    formDiv.style.display = 'block';
+    avisoDivDiv.style.display = 'none';
+    footer.style.display = 'flex';
+    // Data mínima = hoje
+    document.getElementById('r-data').min = new Date().toISOString().split('T')[0];
+    document.getElementById('r-data').value = '';
+    document.getElementById('r-participantes').value = '';
+    document.getElementById('r-inicio').value = '';
+    document.getElementById('r-fim').value = '';
+    document.getElementById('r-valor').textContent = '— MZN';
+    // Calcular valor ao mudar horas
+    ['r-inicio','r-fim'].forEach(id => {
+      document.getElementById(id).addEventListener('change', calcularValor);
+    });
+  }
+  document.getElementById('reserva-alert').className = 'modal-alert';
+  document.getElementById('modal-reserva').classList.add('open');
+}
+
+function calcularValor() {
+  if (!espacoSelecionado) return;
+  const inicio = document.getElementById('r-inicio').value;
+  const fim = document.getElementById('r-fim').value;
+  if (!inicio || !fim) { document.getElementById('r-valor').textContent = '— MZN'; return; }
+  const [h1,m1] = inicio.split(':').map(Number);
+  const [h2,m2] = fim.split(':').map(Number);
+  const horas = ((h2*60+m2) - (h1*60+m1)) / 60;
+  if (horas <= 0) { document.getElementById('r-valor').textContent = 'Horário inválido'; return; }
+  const val = horas * espacoSelecionado.precoReserva;
+  document.getElementById('r-valor').textContent = formatMZN(val) + ' MZN';
+}
+
+function fecharReserva() { document.getElementById('modal-reserva').classList.remove('open'); }
+
+async function confirmarReserva() {
+  const token = localStorage.getItem('token');
+  if (!token) { window.location.href = 'index.html'; return; }
+
+  const data = document.getElementById('r-data').value;
+  const inicio = document.getElementById('r-inicio').value;
+  const fim = document.getElementById('r-fim').value;
+  const partic = parseInt(document.getElementById('r-participantes').value);
+
+  if (!data || !inicio || !fim || !partic) {
+    mostrarAlertaReserva('Preencha todos os campos obrigatórios.', 'error'); return;
+  }
+  if (partic > espacoSelecionado.capacidade) {
+    mostrarAlertaReserva(`Capacidade máxima: ${espacoSelecionado.capacidade} participantes.`, 'error'); return;
+  }
+
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const btn = document.getElementById('btn-confirmar-reserva');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa-solid fa-spinner spinner"></i> A processar…';
+
+  try {
+    // Calcular valor total
+    const [h1,m1] = inicio.split(':').map(Number);
+    const [h2,m2] = fim.split(':').map(Number);
+    const horas = ((h2*60+m2) - (h1*60+m1)) / 60;
+    const valorTotal = horas * espacoSelecionado.precoReserva;
+
+    // Buscar cliente pelo email
+    const clientes = await authFetch('/cliente');
+    const cliente = clientes.find(c => c.email === user.email || c.nome === user.nome);
+
+    if (!cliente) {
+      mostrarAlertaReserva('Cliente não encontrado. Contacte o suporte.', 'error');
+      btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-calendar-check"></i> Confirmar Reserva'; return;
+    }
+
+    const body = {
+      dataEvento: data, horaInicio: inicio, horaFim: fim,
+      numeroParticipantes: partic, valorTotal,
+      espaco: { id: espacoSelecionado.id },
+      cliente: { id: cliente.id }
+    };
+    await authFetch('/reserva', 'POST', body);
+    fecharReserva();
+    mostrarToast('✓ Reserva efectuada com sucesso! Estado: PENDENTE', 'success');
+  } catch(e) {
+    mostrarAlertaReserva(e.message || 'Erro ao efectuar reserva.', 'error');
+    btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-calendar-check"></i> Confirmar Reserva';
+  }
+}
+
+async function authFetch(path, method='GET', body=null) {
+  const token = localStorage.getItem('token');
+  const opts = {
+    method,
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }
+  };
+  if (body) opts.body = JSON.stringify(body);
+  const res = await fetch(API_BASE + path, opts);
+  if (!res.ok) {
+    const txt = await res.text();
+    let data; try { data = JSON.parse(txt); } catch { data = txt; }
+    throw new Error(data?.erro || data?.message || 'Erro ' + res.status);
+  }
+  if (res.status === 204) return null;
+  return res.json();
+}
+
+function mostrarAlertaReserva(msg, tipo) {
+  const el = document.getElementById('reserva-alert');
+  el.textContent = msg; el.className = 'modal-alert ' + tipo;
+}
+
+function mostrarToast(msg, tipo='') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast ' + tipo + ' show';
+  setTimeout(() => t.classList.remove('show'), 4000);
+}
+
+function formatMZN(v) {
+  return new Intl.NumberFormat('pt-MZ', { style:'currency', currency:'MZN', maximumFractionDigits:0 }).format(v || 0);
+}
+
+// Fechar modais clicando fora
+document.getElementById('modal-detail').addEventListener('click', e => {
+  if (e.target === e.currentTarget) fecharDetalhe();
+});
+document.getElementById('modal-reserva').addEventListener('click', e => {
+  if (e.target === e.currentTarget) fecharReserva();
+});
+
+// Iniciar
+carregarEspacos();
+</script>
+</body>
+</html>

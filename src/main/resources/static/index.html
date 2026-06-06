@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ReservaEspaços Maputo — Acesso</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+<link rel="stylesheet" href="css/style.css"/>
+<style>
+body.login-page { background: #f4f1ec; font-family: 'Plus Jakarta Sans', sans-serif; }
+
+.login-visitor-bar {
+  background: #1a5c3a; color: rgba(255,255,255,0.85);
+  text-align: center; padding: 10px 20px; font-size: 13px;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+}
+.login-visitor-bar a {
+  color: #f0d9a8; font-weight: 700; text-decoration: none;
+  border-bottom: 1px solid rgba(240,217,168,0.4);
+}
+.login-visitor-bar a:hover { border-color: #f0d9a8; }
+
+/* Tab switcher */
+.auth-tabs {
+  display: flex;
+  border-bottom: 2px solid #e8e3da;
+  margin-bottom: 24px;
+}
+.auth-tab {
+  flex: 1; padding: 12px; background: none; border: none;
+  font-family: inherit; font-size: 14px; font-weight: 600;
+  color: #999; cursor: pointer; transition: color .2s;
+  border-bottom: 2px solid transparent; margin-bottom: -2px;
+}
+.auth-tab.active { color: #1a5c3a; border-bottom-color: #1a5c3a; }
+.auth-tab:hover:not(.active) { color: #555; }
+
+/* Panel visibility */
+.auth-panel { display: none; }
+.auth-panel.active { display: block; }
+
+/* Role selector */
+.role-selector {
+  display: flex; gap: 8px; margin-top: 6px;
+}
+.role-option {
+  flex: 1; padding: 8px 4px; border: 2px solid #e8e3da;
+  border-radius: 8px; background: #fff; cursor: pointer;
+  font-family: inherit; font-size: 12px; font-weight: 600;
+  color: #666; transition: all .2s; text-align: center;
+}
+.role-option:hover { border-color: #1a5c3a; color: #1a5c3a; }
+.role-option.selected { border-color: #1a5c3a; background: #eaf4ee; color: #1a5c3a; }
+.role-option i { display: block; font-size: 18px; margin-bottom: 4px; }
+</style>
+</head>
+<body class="login-page">
+
+<!-- Visitor bar -->
+<div class="login-visitor-bar">
+  <i class="fa-solid fa-eye"></i>
+  Apenas a explorar? <a href="publico.html">Ver espaços disponíveis sem fazer login →</a>
+</div>
+
+<div class="login-bg">
+  <div class="login-overlay"></div>
+  <div class="floating-shapes">
+    <div class="shape s1"></div>
+    <div class="shape s2"></div>
+    <div class="shape s3"></div>
+  </div>
+</div>
+
+<div class="login-container">
+  <div class="login-card">
+    <div class="login-brand">
+      <div class="brand-icon"><i class="fa-solid fa-building-columns"></i></div>
+      <h1>ReservaEspaços</h1>
+      <p>Gestão de eventos em Maputo</p>
+    </div>
+
+    <div id="alert-box" class="alert hidden"></div>
+
+    <!-- ── Tab switcher ── -->
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="switchTab('login')">
+        <i class="fa-solid fa-right-to-bracket"></i> Entrar
+      </button>
+      <button class="auth-tab" onclick="switchTab('register')">
+        <i class="fa-solid fa-user-plus"></i> Registar
+      </button>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         PAINEL LOGIN
+    ══════════════════════════════════════ -->
+    <div id="panel-login" class="auth-panel active">
+      <form id="login-form" novalidate>
+        <div class="form-group">
+          <label for="login-email">Email</label>
+          <div class="input-wrapper">
+            <i class="fa-solid fa-envelope"></i>
+            <input type="email" id="login-email" placeholder="o_seu@email.mz"
+                   required autocomplete="email"/>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="login-senha">Senha</label>
+          <div class="input-wrapper">
+            <i class="fa-solid fa-lock"></i>
+            <input type="password" id="login-senha" placeholder="••••••••"
+                   required autocomplete="current-password"/>
+            <button type="button" class="toggle-pass" onclick="togglePassword('login-senha','eye-login')">
+              <i class="fa-solid fa-eye" id="eye-login"></i>
+            </button>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-primary btn-full" id="login-btn">
+          <span class="btn-text">Entrar</span>
+          <i class="fa-solid fa-arrow-right"></i>
+          <span class="spinner hidden"><i class="fa-solid fa-spinner fa-spin"></i></span>
+        </button>
+      </form>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         PAINEL REGISTO
+    ══════════════════════════════════════ -->
+    <div id="panel-register" class="auth-panel">
+      <form id="register-form" novalidate>
+
+        <div class="form-group">
+          <label for="reg-nome">Nome completo</label>
+          <div class="input-wrapper">
+            <i class="fa-solid fa-user"></i>
+            <input type="text" id="reg-nome" placeholder="Ex: Armindo Muchanga" required/>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="reg-email">Email</label>
+          <div class="input-wrapper">
+            <i class="fa-solid fa-envelope"></i>
+            <input type="email" id="reg-email" placeholder="o_seu@email.mz" required/>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="reg-senha">Senha</label>
+          <div class="input-wrapper">
+            <i class="fa-solid fa-lock"></i>
+            <input type="password" id="reg-senha" placeholder="Mínimo 8 caracteres"
+                   required minlength="8" autocomplete="new-password"/>
+            <button type="button" class="toggle-pass" onclick="togglePassword('reg-senha','eye-reg')">
+              <i class="fa-solid fa-eye" id="eye-reg"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Perfil de acesso</label>
+          <div class="role-selector">
+            <button type="button" class="role-option selected" data-role="CLIENTE"
+                    onclick="selectRole(this)">
+              <i class="fa-solid fa-user-tie"></i> Cliente
+            </button>
+            <button type="button" class="role-option" data-role="PROPRIETARIO"
+                    onclick="selectRole(this)">
+              <i class="fa-solid fa-building"></i> Proprietário
+            </button>
+          </div>
+          <input type="hidden" id="reg-role" value="CLIENTE"/>
+        </div>
+
+        <button type="submit" class="btn-primary btn-full" id="register-btn">
+          <span class="btn-text">Criar conta</span>
+          <i class="fa-solid fa-user-plus"></i>
+          <span class="spinner hidden"><i class="fa-solid fa-spinner fa-spin"></i></span>
+        </button>
+      </form>
+    </div>
+
+    <div style="text-align:center; margin-top:20px;">
+      <a href="publico.html" style="font-size:13px; color:#7a7a7a; text-decoration:none;">
+        <i class="fa-solid fa-building"></i> Ver espaços disponíveis (público)
+      </a>
+    </div>
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script>
+// ── Redirige se já tem sessão ──────────────────────────────
+if (localStorage.getItem('token')) window.location.href = 'dashboard.html';
+
+// ── Tabs ──────────────────────────────────────────────────
+function switchTab(tab) {
+  document.querySelectorAll('.auth-tab').forEach((t, i) => {
+    t.classList.toggle('active', (i === 0 && tab === 'login') || (i === 1 && tab === 'register'));
+  });
+  document.getElementById('panel-login').classList.toggle('active', tab === 'login');
+  document.getElementById('panel-register').classList.toggle('active', tab === 'register');
+  hideAlert();
+}
+
+// ── Role selector ─────────────────────────────────────────
+function selectRole(btn) {
+  document.querySelectorAll('.role-option').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  document.getElementById('reg-role').value = btn.dataset.role;
+}
+
+// ── Toggle password visibility ────────────────────────────
+function togglePassword(inputId, iconId) {
+  const input = document.getElementById(inputId);
+  const icon  = document.getElementById(iconId);
+  if (input.type === 'password') {
+    input.type = 'text';
+    icon.className = 'fa-solid fa-eye-slash';
+  } else {
+    input.type = 'password';
+    icon.className = 'fa-solid fa-eye';
+  }
+}
+
+// ── Alerts ────────────────────────────────────────────────
+function showAlert(msg, type) {
+  const box = document.getElementById('alert-box');
+  box.innerHTML = '<i class="fa-solid fa-' + (type === 'error' ? 'circle-exclamation' : 'circle-check') + '"></i> ' + msg;
+  box.className = 'alert ' + type;
+}
+function hideAlert() {
+  document.getElementById('alert-box').className = 'alert hidden';
+}
+
+// ── LOGIN ─────────────────────────────────────────────────
+document.getElementById('login-form').addEventListener('submit', async e => {
+  e.preventDefault();
+  const btn     = document.getElementById('login-btn');
+  const spinner = btn.querySelector('.spinner');
+  const btnText = btn.querySelector('.btn-text');
+  const arrow   = btn.querySelector('.fa-arrow-right');
+
+  btn.disabled = true;
+  spinner.classList.remove('hidden');
+  btnText.textContent = 'A entrar...';
+  arrow.classList.add('hidden');
+  hideAlert();
+
+  const email = document.getElementById('login-email').value.trim();
+  const senha = document.getElementById('login-senha').value;
+
+  try {
+    const data = await API.login(email, senha);
+    localStorage.setItem('token', data.token);
+    localStorage.setItem('user', JSON.stringify({ nome: data.nome, email: data.email, role: data.role }));
+    window.location.href = 'dashboard.html';
+  } catch (err) {
+    showAlert(err.message || 'Credenciais inválidas. Tente novamente.', 'error');
+    btn.disabled = false;
+    spinner.classList.add('hidden');
+    btnText.textContent = 'Entrar';
+    arrow.classList.remove('hidden');
+  }
+});
+
+// ── REGISTO ───────────────────────────────────────────────
+document.getElementById('register-form').addEventListener('submit', async e => {
+  e.preventDefault();
+  const btn     = document.getElementById('register-btn');
+  const spinner = btn.querySelector('.spinner');
+  const btnText = btn.querySelector('.btn-text');
+  const icon    = btn.querySelector('.fa-user-plus');
+
+  const nome  = document.getElementById('reg-nome').value.trim();
+  const email = document.getElementById('reg-email').value.trim();
+  const senha = document.getElementById('reg-senha').value;
+  const role  = document.getElementById('reg-role').value;
+
+  if (senha.length < 8) {
+    showAlert('A senha deve ter pelo menos 8 caracteres.', 'error');
+    return;
+  }
+
+  btn.disabled = true;
+  spinner.classList.remove('hidden');
+  btnText.textContent = 'A criar conta...';
+  icon.classList.add('hidden');
+  hideAlert();
+
+  try {
+    await API.register(nome, email, senha, role);
+    showAlert('Conta criada com sucesso! Pode agora fazer login.', 'success');
+    // Limpa o formulário e muda para o tab de login
+    document.getElementById('register-form').reset();
+    document.getElementById('reg-role').value = 'CLIENTE';
+    document.querySelectorAll('.role-option').forEach((b, i) => b.classList.toggle('selected', i === 0));
+    setTimeout(() => switchTab('login'), 1500);
+  } catch (err) {
+    showAlert(err.message || 'Erro ao criar conta. Tente novamente.', 'error');
+  } finally {
+    btn.disabled = false;
+    spinner.classList.add('hidden');
+    btnText.textContent = 'Criar conta';
+    icon.classList.remove('hidden');
+  }
+});
+</script>
+</body>
+</html>

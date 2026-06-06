@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Pagamentos — ReservaEspaços Maputo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+<link rel="stylesheet" href="css/style.css"/>
+<style>
+/* ── Barra de consultas (cap. 11) ── */
+.query-bar {
+  display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end;
+  background: var(--surface, #fff); border: 1px solid var(--border, #e5e7eb);
+  border-radius: 10px; padding: 14px 16px; margin-bottom: 16px;
+}
+.query-bar label {
+  display: block; font-size: 11px; font-weight: 600; color: #6b7280;
+  text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px;
+}
+.query-bar input, .query-bar select {
+  padding: 7px 10px; border: 1px solid var(--border, #e5e7eb);
+  border-radius: 7px; font-size: 13px; font-family: inherit;
+  background: var(--bg, #f9fafb); color: inherit; min-width: 160px;
+}
+.query-bar .btn-query {
+  padding: 8px 16px; background: var(--primary, #1a5c3a); color: #fff;
+  border: none; border-radius: 7px; font-size: 13px; font-weight: 600;
+  cursor: pointer; white-space: nowrap; display: flex; align-items: center; gap: 6px;
+}
+.query-bar .btn-query:hover { opacity: .88; }
+.query-bar .btn-clear {
+  padding: 8px 12px; background: none; color: #6b7280;
+  border: 1px solid var(--border, #e5e7eb); border-radius: 7px;
+  font-size: 13px; cursor: pointer;
+}
+.query-bar .btn-clear:hover { color: var(--danger, #dc2626); border-color: var(--danger, #dc2626); }
+.query-bar .divider { width: 1px; background: #e5e7eb; align-self: stretch; margin: 0 4px; }
+.query-group { display: flex; flex-direction: column; }
+
+/* ── Estatísticas ── */
+.stats-mini {
+  display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap;
+}
+.stat-mini {
+  flex: 1; min-width: 140px;
+  background: var(--surface, #fff); border: 1px solid var(--border, #e5e7eb);
+  border-radius: 10px; padding: 14px 16px;
+  display: flex; flex-direction: column; gap: 4px;
+}
+.sm-label { font-size: 11px; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: .5px; }
+.sm-val   { font-size: 20px; font-weight: 700; color: var(--primary, #1a5c3a); }
+
+/* ── Badges método pagamento ── */
+.metodo-badge {
+  display: inline-block; padding: 3px 9px;
+  border-radius: 20px; font-size: 11px; font-weight: 600;
+  background: #f0fdf4; color: #065f46; border: 1px solid #bbf7d0;
+}
+
+/* ── Valor destaque ── */
+.amount { color: var(--primary, #1a5c3a); font-size: 14px; }
+
+/* ── Nota do modal ── */
+.form-note {
+  font-size: 12px; color: #6b7280;
+  background: #f0fdf4; border: 1px solid #bbf7d0;
+  border-radius: 7px; padding: 8px 12px; margin-top: 4px;
+}
+.form-note.warn {
+  background: #fffbeb; border-color: #fde68a; color: #92400e;
+}
+</style>
+</head>
+<body>
+<div class="sidebar-overlay" id="overlay" onclick="closeSidebar()"></div>
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div class="brand">
+      <div class="brand-icon sm"><i class="fa-solid fa-building-columns"></i></div>
+      <div><span class="brand-name">ReservaEspaços</span><span class="brand-sub">Maputo</span></div>
+    </div>
+    <button class="sidebar-close" onclick="closeSidebar()"><i class="fa-solid fa-xmark"></i></button>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section"><span class="nav-label">Principal</span>
+      <a href="dashboard.html" class="nav-item"><i class="fa-solid fa-chart-pie"></i><span>Dashboard</span></a>
+    </div>
+    <div class="nav-section"><span class="nav-label">Gestão</span>
+      <a href="clientes.html" class="nav-item"><i class="fa-solid fa-users"></i><span>Clientes</span></a>
+      <a href="proprietarios.html" class="nav-item"><i class="fa-solid fa-user-tie"></i><span>Proprietários</span></a>
+      <a href="espacos.html" class="nav-item"><i class="fa-solid fa-building"></i><span>Espaços</span></a>
+    </div>
+    <div class="nav-section"><span class="nav-label">Operações</span>
+      <a href="reservas.html" class="nav-item"><i class="fa-solid fa-calendar-check"></i><span>Reservas</span></a>
+      <a href="pagamentos.html" class="nav-item active"><i class="fa-solid fa-credit-card"></i><span>Pagamentos</span></a>
+    </div>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-info"><div class="avatar" id="sidebar-avatar">?</div>
+      <div><div class="user-name" id="sidebar-name">—</div><div class="user-role" id="sidebar-role">—</div></div>
+    </div>
+    <button class="btn-logout" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i></button>
+  </div>
+</aside>
+
+<div class="main-wrapper">
+  <header class="topbar">
+    <button class="hamburger" onclick="openSidebar()"><i class="fa-solid fa-bars"></i></button>
+    <div class="topbar-title"><h2>Pagamentos</h2><p id="topbar-date"></p></div>
+    <div class="topbar-actions"><div class="badge-role" id="topbar-role"></div></div>
+  </header>
+
+  <main class="page-content">
+
+    <!-- ══════════════════════════════════════════
+         BARRA DE CONSULTAS — Capítulo 11
+         POST /pagamento          → modal abaixo
+         GET  /pagamento/{id}     → por ID
+         GET  /pagamento/data/{d} → por data
+    ══════════════════════════════════════════ -->
+    <div class="query-bar">
+
+      <!-- Consulta por ID -->
+      <div class="query-group">
+        <label><i class="fa-solid fa-hashtag"></i> Consultar por ID</label>
+        <input type="number" id="q-id" placeholder="Ex: 2" min="1"/>
+      </div>
+      <button class="btn-query" onclick="consultarPorId()">
+        <i class="fa-solid fa-magnifying-glass"></i> Buscar
+      </button>
+
+      <div class="divider"></div>
+
+      <!-- Consulta por data -->
+      <div class="query-group">
+        <label><i class="fa-solid fa-calendar-day"></i> Consultar por Data de Pagamento</label>
+        <input type="date" id="q-data"/>
+      </div>
+      <button class="btn-query" onclick="consultarPorData()">
+        <i class="fa-solid fa-magnifying-glass"></i> Buscar
+      </button>
+
+      <button class="btn-clear" onclick="limparConsulta()" title="Mostrar todos os pagamentos">
+        <i class="fa-solid fa-rotate-left"></i> Limpar
+      </button>
+    </div>
+
+    <!-- Indicador de consulta activa -->
+    <div id="query-info" style="display:none; margin-bottom:10px;">
+      <span class="badge" style="background:#e0f2fe;color:#0369a1;font-size:13px;padding:6px 12px;border-radius:20px;">
+        <i class="fa-solid fa-filter"></i>
+        <span id="query-info-text"></span>
+        &nbsp;<a href="#" onclick="limparConsulta();return false;" style="color:#0369a1;font-weight:700;">✕ limpar</a>
+      </span>
+    </div>
+
+    <!-- Toolbar: pesquisa local + botão registar -->
+    <div class="page-toolbar">
+      <div class="search-box">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="search" placeholder="Pesquisar por reserva, espaço ou método…" oninput="filterData()"/>
+      </div>
+      <button class="btn-primary" onclick="openModal()">
+        <i class="fa-solid fa-plus"></i> Registar Pagamento
+      </button>
+    </div>
+
+    <!-- Estatísticas dos resultados visíveis -->
+    <div class="stats-mini">
+      <div class="stat-mini">
+        <span class="sm-label"><i class="fa-solid fa-coins"></i> Total recebido</span>
+        <span class="sm-val" id="sm-total">—</span>
+      </div>
+      <div class="stat-mini">
+        <span class="sm-label"><i class="fa-solid fa-receipt"></i> Nº de pagamentos</span>
+        <span class="sm-val" id="sm-count">—</span>
+      </div>
+      <div class="stat-mini">
+        <span class="sm-label"><i class="fa-solid fa-chart-simple"></i> Média por pagamento</span>
+        <span class="sm-val" id="sm-avg">—</span>
+      </div>
+    </div>
+
+    <!-- Tabela de pagamentos -->
+    <div class="card">
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Reserva</th>
+              <th>Cliente</th>
+              <th>Valor Pago</th>
+              <th>Data</th>
+              <th>Método</th>
+            </tr>
+          </thead>
+          <tbody id="tbody">
+            <tr><td colspan="6" class="loading-cell">
+              <i class="fa-solid fa-spinner fa-spin"></i> A carregar…
+            </td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- ══════════════════════════════════════════
+     Modal — Registar Pagamento (POST /pagamento)
+══════════════════════════════════════════ -->
+<div class="modal-backdrop" id="modal" onclick="closeOnBackdrop(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Registar Pagamento</h3>
+      <button onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <div id="modal-alert" class="alert hidden"></div>
+
+      <div class="form-group">
+        <label>Reserva *</label>
+        <select id="f-reservaId" onchange="onReservaChange()">
+          <option value="">— Selecione uma Reserva —</option>
+        </select>
+      </div>
+
+      <!-- Resumo da reserva seleccionada -->
+      <div id="reserva-info" style="display:none;" class="form-note">
+        <i class="fa-solid fa-circle-info"></i>
+        <span id="reserva-info-text"></span>
+      </div>
+
+      <div class="form-row" style="margin-top:12px;">
+        <div class="form-group">
+          <label>Valor Pago (MZN) *</label>
+          <input type="number" id="f-valorPago" min="0.01" step="0.01" placeholder="Ex: 50000.00"/>
+        </div>
+        <div class="form-group">
+          <label>Data de Pagamento *</label>
+          <input type="date" id="f-dataPagamento"/>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Método de Pagamento *</label>
+        <select id="f-metodoPagamento">
+          <option value="M-Pesa">M-Pesa</option>
+          <option value="e-Mola">e-Mola</option>
+          <option value="Transferencia Bancaria">Transferência Bancária</option>
+          <option value="Numerario">Numerário</option>
+          <option value="Cheque">Cheque</option>
+        </select>
+      </div>
+
+      <div class="form-note">
+        <i class="fa-solid fa-circle-check" style="color:#16a34a;"></i>
+        Se o valor pago cobrir o total da reserva, o estado passa automaticamente a <strong>CONFIRMADA</strong>.
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeModal()">Cancelar</button>
+      <button class="btn-primary" id="btn-save" onclick="save()">
+        <i class="fa-solid fa-floppy-disk"></i> Guardar
+      </button>
+    </div>
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/app.js"></script>
+<script>
+checkAuth(); initUI();
+
+// ── Estado global ─────────────────────────────────────────
+let allData = [];   // cache de /pagamento
+let viewData = [];  // dados na tabela actualmente
+let reservas = [];  // cache de /reserva
+
+// ── Carga inicial ─────────────────────────────────────────
+async function load() {
+  try {
+    const [pagamentos, res] = await Promise.all([
+      API.get('/pagamento'),
+      API.get('/reserva')
+    ]);
+    allData  = pagamentos;
+    reservas = res;
+
+    // Preenche select do modal com reservas não canceladas
+    const sel = document.getElementById('f-reservaId');
+    sel.innerHTML = '<option value="">— Selecione uma Reserva —</option>' +
+      reservas
+        .filter(r => r.estado !== 'CANCELADA')
+        .map(r => `<option value="${r.id}">#${r.id} — ${r.espaco?.nomeEspaco || 'Espaço'} · ${r.estado} · ${formatMZN(r.valorTotal)}</option>`)
+        .join('');
+
+    viewData = allData;
+    updateStats(viewData);
+    render(viewData);
+  } catch (e) {
+    showTableError('tbody', 6, e.message);
+  }
+}
+
+// ── Tabela ────────────────────────────────────────────────
+function render(rows) {
+  const tbody = document.getElementById('tbody');
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="6" class="empty-cell">Sem pagamentos encontrados</td></tr>';
+    return;
+  }
+  tbody.innerHTML = rows.map(p => `
+    <tr>
+      <td><span class="mono">#${p.id}</span></td>
+      <td><span class="mono">#${p.reserva?.id}</span> — ${p.reserva?.espaco?.nomeEspaco || 'N/A'}</td>
+      <td>${p.reserva?.cliente?.nome ?? ''} ${p.reserva?.cliente?.apelido ?? ''}</td>
+      <td><strong class="amount">${formatMZN(p.valorPago)}</strong></td>
+      <td>${formatDate(p.dataPagamento)}</td>
+      <td><span class="metodo-badge">${p.metodoPagamento}</span></td>
+    </tr>`).join('');
+}
+
+function updateStats(rows) {
+  const total = rows.reduce((s, p) => s + parseFloat(p.valorPago || 0), 0);
+  document.getElementById('sm-total').textContent = formatMZN(total);
+  document.getElementById('sm-count').textContent = rows.length;
+  document.getElementById('sm-avg').textContent   = rows.length ? formatMZN(total / rows.length) : formatMZN(0);
+}
+
+// ── Filtro local (pesquisa de texto) ─────────────────────
+function filterData() {
+  const q = document.getElementById('search').value.toLowerCase();
+  const filtered = viewData.filter(p =>
+    !q || `${p.reserva?.id} ${p.metodoPagamento} ${p.reserva?.espaco?.nomeEspaco} ${p.reserva?.cliente?.nome}`.toLowerCase().includes(q)
+  );
+  updateStats(filtered);
+  render(filtered);
+}
+
+// ── Consultas remotas — Capítulo 11 ──────────────────────
+
+/** GET /pagamento/{id} */
+async function consultarPorId() {
+  const id = document.getElementById('q-id').value.trim();
+  if (!id) { alert('Introduza um ID válido.'); return; }
+  try {
+    const p = await API.get(`/pagamento/${id}`);
+    viewData = [p];
+    mostrarQueryInfo(`Pagamento #${id}`);
+    updateStats(viewData);
+    render(viewData);
+  } catch (e) {
+    viewData = [];
+    mostrarQueryInfo(`Pagamento #${id} — não encontrado`);
+    updateStats([]);
+    render([]);
+  }
+}
+
+/** GET /pagamento/data/{dataPagamento} */
+async function consultarPorData() {
+  const data = document.getElementById('q-data').value;
+  if (!data) { alert('Selecione uma data.'); return; }
+  try {
+    const lista = await API.get(`/pagamento/data/${data}`);
+    viewData = lista;
+    mostrarQueryInfo(`Pagamentos de ${formatDate(data)}`);
+    updateStats(viewData);
+    render(viewData);
+  } catch (e) {
+    // 404 = nenhum pagamento nessa data
+    viewData = [];
+    mostrarQueryInfo(`Pagamentos de ${formatDate(data)} — nenhum encontrado`);
+    updateStats([]);
+    render([]);
+  }
+}
+
+/** Repõe a listagem completa */
+function limparConsulta() {
+  viewData = allData;
+  document.getElementById('q-id').value   = '';
+  document.getElementById('q-data').value = '';
+  document.getElementById('search').value = '';
+  ocultarQueryInfo();
+  updateStats(viewData);
+  render(viewData);
+}
+
+function mostrarQueryInfo(texto) {
+  document.getElementById('query-info-text').textContent = texto;
+  document.getElementById('query-info').style.display = 'block';
+}
+function ocultarQueryInfo() {
+  document.getElementById('query-info').style.display = 'none';
+}
+
+// ── Modal Registar Pagamento ──────────────────────────────
+function openModal() {
+  document.getElementById('f-reservaId').value      = '';
+  document.getElementById('f-valorPago').value      = '';
+  document.getElementById('f-dataPagamento').value  = new Date().toISOString().split('T')[0];
+  document.getElementById('f-metodoPagamento').value = 'M-Pesa';
+  document.getElementById('reserva-info').style.display = 'none';
+  hideModalAlert();
+  document.getElementById('modal').classList.add('show');
+}
+
+/** Mostra resumo da reserva seleccionada */
+function onReservaChange() {
+  const id = document.getElementById('f-reservaId').value;
+  const infoEl = document.getElementById('reserva-info');
+  if (!id) { infoEl.style.display = 'none'; return; }
+  const r = reservas.find(x => String(x.id) === String(id));
+  if (!r) { infoEl.style.display = 'none'; return; }
+  document.getElementById('reserva-info-text').textContent =
+    `Reserva #${r.id} · ${r.espaco?.nomeEspaco || ''} · ` +
+    `${r.cliente?.nome || ''} ${r.cliente?.apelido || ''} · ` +
+    `Valor total: ${formatMZN(r.valorTotal)} · Estado: ${r.estado}`;
+  infoEl.style.display = 'block';
+  // Pré-preenche o valor com o total da reserva
+  if (!document.getElementById('f-valorPago').value) {
+    document.getElementById('f-valorPago').value = parseFloat(r.valorTotal).toFixed(2);
+  }
+}
+
+/** POST /pagamento?reservaId= */
+async function save() {
+  const btn       = document.getElementById('btn-save');
+  const reservaId = document.getElementById('f-reservaId').value;
+  const valorPago = document.getElementById('f-valorPago').value;
+  const dataPag   = document.getElementById('f-dataPagamento').value;
+  const metodo    = document.getElementById('f-metodoPagamento').value;
+
+  // Validação frontend
+  if (!reservaId)           return showModalAlert('Selecione uma reserva.');
+  if (!valorPago || parseFloat(valorPago) <= 0)
+                            return showModalAlert('Introduza um valor pago válido (> 0).');
+  if (!dataPag)             return showModalAlert('Introduza a data de pagamento.');
+  if (!metodo)              return showModalAlert('Selecione o método de pagamento.');
+
+  btn.disabled = true;
+  hideModalAlert();
+
+  const body = {
+    valorPago:       parseFloat(valorPago),
+    dataPagamento:   dataPag,
+    metodoPagamento: metodo
+  };
+
+  try {
+    await API.post(`/pagamento?reservaId=${reservaId}`, body);
+    closeModal();
+    await load();
+    limparConsulta();
+  } catch (e) {
+    showModalAlert(e.message);
+    btn.disabled = false;
+  }
+}
+
+// ── Arranque ──────────────────────────────────────────────
+load();
+</script>
+</body>
+</html>

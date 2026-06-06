@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Dashboard — ReservaEspaços Maputo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+<link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+
+<!-- Sidebar overlay (mobile) -->
+<div class="sidebar-overlay" id="overlay" onclick="closeSidebar()"></div>
+
+<!-- Sidebar -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div class="brand">
+      <div class="brand-icon sm"><i class="fa-solid fa-building-columns"></i></div>
+      <div>
+        <span class="brand-name">ReservaEspaços</span>
+        <span class="brand-sub">Maputo</span>
+      </div>
+    </div>
+    <button class="sidebar-close" onclick="closeSidebar()"><i class="fa-solid fa-xmark"></i></button>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-section">
+      <span class="nav-label">Principal</span>
+      <a href="dashboard.html" class="nav-item active" data-page="dashboard">
+        <i class="fa-solid fa-chart-pie"></i><span>Dashboard</span>
+      </a>
+    </div>
+    <div class="nav-section">
+      <span class="nav-label">Gestão</span>
+      <a href="clientes.html" class="nav-item" data-page="clientes">
+        <i class="fa-solid fa-users"></i><span>Clientes</span>
+      </a>
+      <a href="proprietarios.html" class="nav-item" data-page="proprietarios">
+        <i class="fa-solid fa-user-tie"></i><span>Proprietários</span>
+      </a>
+      <a href="espacos.html" class="nav-item" data-page="espacos">
+        <i class="fa-solid fa-building"></i><span>Espaços</span>
+      </a>
+    </div>
+    <div class="nav-section">
+      <span class="nav-label">Operações</span>
+      <a href="reservas.html" class="nav-item" data-page="reservas">
+        <i class="fa-solid fa-calendar-check"></i><span>Reservas</span>
+      </a>
+      <a href="pagamentos.html" class="nav-item" data-page="pagamentos">
+        <i class="fa-solid fa-credit-card"></i><span>Pagamentos</span>
+      </a>
+    </div>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="user-info" id="sidebar-user">
+      <div class="avatar" id="sidebar-avatar">?</div>
+      <div>
+        <div class="user-name" id="sidebar-name">—</div>
+        <div class="user-role" id="sidebar-role">—</div>
+      </div>
+    </div>
+    <button class="btn-logout" onclick="logout()" title="Sair">
+      <i class="fa-solid fa-right-from-bracket"></i>
+    </button>
+  </div>
+</aside>
+
+<!-- Main content -->
+<div class="main-wrapper">
+  <!-- Top bar -->
+  <header class="topbar">
+    <button class="hamburger" onclick="openSidebar()"><i class="fa-solid fa-bars"></i></button>
+    <div class="topbar-title">
+      <h2>Dashboard</h2>
+      <p id="topbar-date"></p>
+    </div>
+    <div class="topbar-actions">
+      <div class="badge-role" id="topbar-role"></div>
+    </div>
+  </header>
+
+  <!-- Page content -->
+  <main class="page-content">
+    <!-- Stat cards -->
+    <div class="stats-grid" id="stats-grid">
+      <div class="stat-card" id="stat-clientes">
+        <div class="stat-icon blue"><i class="fa-solid fa-users"></i></div>
+        <div class="stat-body">
+          <p class="stat-label">Clientes</p>
+          <h3 class="stat-value">—</h3>
+        </div>
+      </div>
+      <div class="stat-card" id="stat-espacos">
+        <div class="stat-icon teal"><i class="fa-solid fa-building"></i></div>
+        <div class="stat-body">
+          <p class="stat-label">Espaços</p>
+          <h3 class="stat-value">—</h3>
+        </div>
+      </div>
+      <div class="stat-card" id="stat-reservas">
+        <div class="stat-icon amber"><i class="fa-solid fa-calendar-check"></i></div>
+        <div class="stat-body">
+          <p class="stat-label">Reservas</p>
+          <h3 class="stat-value">—</h3>
+        </div>
+      </div>
+      <div class="stat-card" id="stat-receita">
+        <div class="stat-icon green"><i class="fa-solid fa-money-bill-trend-up"></i></div>
+        <div class="stat-body">
+          <p class="stat-label">Receita Total</p>
+          <h3 class="stat-value">—</h3>
+        </div>
+      </div>
+    </div>
+
+    <!-- Two columns -->
+    <div class="dash-grid">
+      <!-- Reservas recentes -->
+      <div class="card">
+        <div class="card-header">
+          <h3><i class="fa-solid fa-clock-rotate-left"></i> Reservas recentes</h3>
+          <a href="reservas.html" class="link-small">Ver todas <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+        <div class="card-body" id="recent-reservas">
+          <div class="skeleton-list">
+            <div class="skeleton-row"></div>
+            <div class="skeleton-row"></div>
+            <div class="skeleton-row"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Espaços disponíveis -->
+      <div class="card">
+        <div class="card-header">
+          <h3><i class="fa-solid fa-circle-check"></i> Espaços disponíveis</h3>
+          <a href="espacos.html" class="link-small">Ver todos <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+        <div class="card-body" id="avail-espacos">
+          <div class="skeleton-list">
+            <div class="skeleton-row"></div>
+            <div class="skeleton-row"></div>
+            <div class="skeleton-row"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Distribuição por estado -->
+    <div class="card mt-1">
+      <div class="card-header">
+        <h3><i class="fa-solid fa-chart-donut"></i> Distribuição de reservas por estado</h3>
+      </div>
+      <div class="card-body">
+        <div class="estado-chart" id="estado-chart"></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/app.js"></script>
+<script>
+checkAuth();
+initUI();
+
+async function loadDashboard() {
+  try {
+    const [clientes, espacos, reservas, pagamentos] = await Promise.all([
+      API.get('/cliente'),
+      API.get('/espaco'),
+      API.get('/reserva'),
+      API.get('/pagamento')
+    ]);
+
+    // Stats
+    setStatValue('stat-clientes', clientes.length);
+    setStatValue('stat-espacos', espacos.length);
+    setStatValue('stat-reservas', reservas.length);
+    const receita = pagamentos.reduce((s, p) => s + parseFloat(p.valorPago || 0), 0);
+    setStatValue('stat-receita', formatMZN(receita));
+
+    // Reservas recentes (últimas 5)
+    const rec = reservas.slice(-5).reverse();
+    document.getElementById('recent-reservas').innerHTML = rec.length
+      ? rec.map(r => `
+        <div class="list-row">
+          <div class="list-main">
+            <span class="list-title">${r.espaco?.nomeEspaco || 'Espaço #' + r.espaco?.id}</span>
+            <span class="list-sub">${r.cliente?.nome} ${r.cliente?.apelido || ''}</span>
+          </div>
+          <div class="list-side">
+            <span class="badge estado-${r.estado}">${r.estado}</span>
+            <span class="list-date">${formatDate(r.dataEvento)}</span>
+          </div>
+        </div>`).join('')
+      : '<p class="empty-msg">Sem reservas</p>';
+
+    // Espaços disponíveis
+    const disp = espacos.filter(e => e.disponibilidade).slice(0, 5);
+    document.getElementById('avail-espacos').innerHTML = disp.length
+      ? disp.map(e => `
+        <div class="list-row">
+          <div class="list-main">
+            <span class="list-title">${e.nomeEspaco}</span>
+            <span class="list-sub">${e.bairro} · ${e.tipoEvento}</span>
+          </div>
+          <div class="list-side">
+            <span class="list-cap"><i class="fa-solid fa-users"></i> ${e.capacidade}</span>
+            <span class="list-price">${formatMZN(e.precoReserva)}</span>
+          </div>
+        </div>`).join('')
+      : '<p class="empty-msg">Sem espaços disponíveis</p>';
+
+    // Estado chart
+    const estados = { PENDENTE: 0, CONFIRMADA: 0, CANCELADA: 0, CONCLUIDA: 0 };
+    reservas.forEach(r => { if (estados[r.estado] !== undefined) estados[r.estado]++; });
+    const total = reservas.length || 1;
+    const colors = { PENDENTE:'#F59E0B', CONFIRMADA:'#10B981', CANCELADA:'#EF4444', CONCLUIDA:'#6366F1' };
+    document.getElementById('estado-chart').innerHTML = Object.entries(estados).map(([k, v]) => `
+      <div class="estado-item">
+        <div class="estado-header">
+          <span class="dot" style="background:${colors[k]}"></span>
+          <span class="estado-name">${k}</span>
+          <span class="estado-count">${v}</span>
+        </div>
+        <div class="estado-bar-bg">
+          <div class="estado-bar" style="width:${Math.round(v/total*100)}%;background:${colors[k]}"></div>
+        </div>
+        <span class="estado-pct">${Math.round(v/total*100)}%</span>
+      </div>`).join('');
+
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+function setStatValue(id, val) {
+  document.querySelector(`#${id} .stat-value`).textContent = val;
+}
+
+loadDashboard();
+</script>
+</body>
+</html>

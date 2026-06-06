@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Reservas — ReservaEspaços Maputo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+<link rel="stylesheet" href="css/style.css"/>
+<style>
+/* ── Barra de filtros de consulta (cap. 10) ── */
+.query-bar {
+  display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end;
+  background: var(--surface, #fff); border: 1px solid var(--border, #e5e7eb);
+  border-radius: 10px; padding: 14px 16px; margin-bottom: 16px;
+}
+.query-bar label {
+  display: block; font-size: 11px; font-weight: 600; color: #6b7280;
+  text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px;
+}
+.query-bar input, .query-bar select {
+  padding: 7px 10px; border: 1px solid var(--border, #e5e7eb);
+  border-radius: 7px; font-size: 13px; font-family: inherit;
+  background: var(--bg, #f9fafb); color: inherit;
+  min-width: 160px;
+}
+.query-bar .btn-query {
+  padding: 8px 16px; background: var(--primary, #1a5c3a); color: #fff;
+  border: none; border-radius: 7px; font-size: 13px; font-weight: 600;
+  cursor: pointer; white-space: nowrap; display: flex; align-items: center; gap: 6px;
+}
+.query-bar .btn-query:hover { opacity: .88; }
+.query-bar .btn-clear {
+  padding: 8px 12px; background: none; color: #6b7280;
+  border: 1px solid var(--border, #e5e7eb); border-radius: 7px;
+  font-size: 13px; cursor: pointer;
+}
+.query-bar .btn-clear:hover { color: var(--danger, #dc2626); border-color: var(--danger, #dc2626); }
+.query-group { display: flex; flex-direction: column; }
+
+/* Badges de estado */
+.badge.estado-PENDENTE   { background:#fef3c7; color:#92400e; }
+.badge.estado-CONFIRMADA { background:#d1fae5; color:#065f46; }
+.badge.estado-CANCELADA  { background:#fee2e2; color:#991b1b; }
+.badge.estado-CONCLUIDA  { background:#e0e7ff; color:#3730a3; }
+
+.form-note {
+  font-size: 12px; color: #6b7280;
+  background: #f0fdf4; border: 1px solid #bbf7d0;
+  border-radius: 7px; padding: 8px 12px; margin-top: 4px;
+}
+</style>
+</head>
+<body>
+<div class="sidebar-overlay" id="overlay" onclick="closeSidebar()"></div>
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div class="brand">
+      <div class="brand-icon sm"><i class="fa-solid fa-building-columns"></i></div>
+      <div><span class="brand-name">ReservaEspaços</span><span class="brand-sub">Maputo</span></div>
+    </div>
+    <button class="sidebar-close" onclick="closeSidebar()"><i class="fa-solid fa-xmark"></i></button>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section"><span class="nav-label">Principal</span>
+      <a href="dashboard.html" class="nav-item"><i class="fa-solid fa-chart-pie"></i><span>Dashboard</span></a>
+    </div>
+    <div class="nav-section"><span class="nav-label">Gestão</span>
+      <a href="clientes.html" class="nav-item"><i class="fa-solid fa-users"></i><span>Clientes</span></a>
+      <a href="proprietarios.html" class="nav-item"><i class="fa-solid fa-user-tie"></i><span>Proprietários</span></a>
+      <a href="espacos.html" class="nav-item"><i class="fa-solid fa-building"></i><span>Espaços</span></a>
+    </div>
+    <div class="nav-section"><span class="nav-label">Operações</span>
+      <a href="reservas.html" class="nav-item active"><i class="fa-solid fa-calendar-check"></i><span>Reservas</span></a>
+      <a href="pagamentos.html" class="nav-item"><i class="fa-solid fa-credit-card"></i><span>Pagamentos</span></a>
+    </div>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-info"><div class="avatar" id="sidebar-avatar">?</div>
+      <div><div class="user-name" id="sidebar-name">—</div><div class="user-role" id="sidebar-role">—</div></div>
+    </div>
+    <button class="btn-logout" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i></button>
+  </div>
+</aside>
+
+<div class="main-wrapper">
+  <header class="topbar">
+    <button class="hamburger" onclick="openSidebar()"><i class="fa-solid fa-bars"></i></button>
+    <div class="topbar-title"><h2>Reservas</h2><p id="topbar-date"></p></div>
+    <div class="topbar-actions"><div class="badge-role" id="topbar-role"></div></div>
+  </header>
+
+  <main class="page-content">
+
+    <!-- ══════════════════════════════════════════
+         BARRA DE CONSULTAS — Capítulo 10
+         POST /reserva            → modal abaixo
+         GET  /reserva/{id}       → por ID
+         GET  /reserva/data/{d}   → por data
+         GET  /reserva/cliente/{c}→ por cliente
+    ══════════════════════════════════════════ -->
+    <div class="query-bar">
+      <!-- Consulta por ID -->
+      <div class="query-group">
+        <label><i class="fa-solid fa-hashtag"></i> Consultar por ID</label>
+        <input type="number" id="q-id" placeholder="Ex: 3" min="1"/>
+      </div>
+      <button class="btn-query" onclick="consultarPorId()">
+        <i class="fa-solid fa-magnifying-glass"></i> Buscar
+      </button>
+
+      <div style="width:1px;background:#e5e7eb;align-self:stretch;margin:0 4px;"></div>
+
+      <!-- Consulta por data -->
+      <div class="query-group">
+        <label><i class="fa-solid fa-calendar-day"></i> Consultar por Data do Evento</label>
+        <input type="date" id="q-data"/>
+      </div>
+      <button class="btn-query" onclick="consultarPorData()">
+        <i class="fa-solid fa-magnifying-glass"></i> Buscar
+      </button>
+
+      <div style="width:1px;background:#e5e7eb;align-self:stretch;margin:0 4px;"></div>
+
+      <!-- Consulta por cliente -->
+      <div class="query-group">
+        <label><i class="fa-solid fa-user"></i> Consultar por Cliente</label>
+        <select id="q-cliente">
+          <option value="">— Selecione —</option>
+        </select>
+      </div>
+      <button class="btn-query" onclick="consultarPorCliente()">
+        <i class="fa-solid fa-magnifying-glass"></i> Buscar
+      </button>
+
+      <button class="btn-clear" onclick="limparConsulta()" title="Mostrar todas as reservas">
+        <i class="fa-solid fa-rotate-left"></i> Limpar
+      </button>
+    </div>
+
+    <!-- Tabs de estado + toolbar -->
+    <div class="estado-tabs" id="estado-tabs">
+      <button class="etab active" data-estado="" onclick="filterEstado(this)">Todas</button>
+      <button class="etab" data-estado="PENDENTE" onclick="filterEstado(this)">Pendentes</button>
+      <button class="etab" data-estado="CONFIRMADA" onclick="filterEstado(this)">Confirmadas</button>
+      <button class="etab" data-estado="CANCELADA" onclick="filterEstado(this)">Canceladas</button>
+      <button class="etab" data-estado="CONCLUIDA" onclick="filterEstado(this)">Concluídas</button>
+    </div>
+
+    <div class="page-toolbar mt-sm">
+      <div class="search-box">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="search" placeholder="Pesquisar por cliente ou espaço…" oninput="filterData()"/>
+      </div>
+      <button class="btn-primary" onclick="openModal()">
+        <i class="fa-solid fa-plus"></i> Nova Reserva
+      </button>
+    </div>
+
+    <!-- Indicador de consulta activa -->
+    <div id="query-info" style="display:none; margin-bottom:10px;">
+      <span class="badge" style="background:#e0f2fe;color:#0369a1;font-size:13px;padding:6px 12px;border-radius:20px;">
+        <i class="fa-solid fa-filter"></i>
+        <span id="query-info-text"></span>
+        &nbsp;<a href="#" onclick="limparConsulta();return false;" style="color:#0369a1;font-weight:700;">✕ limpar</a>
+      </span>
+    </div>
+
+    <div class="card">
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>ID</th><th>Cliente</th><th>Espaço</th><th>Data Evento</th>
+              <th>Horário</th><th>Participantes</th><th>Valor Total</th><th>Estado</th>
+              <th class="col-actions">Acções</th>
+            </tr>
+          </thead>
+          <tbody id="tbody">
+            <tr><td colspan="9" class="loading-cell"><i class="fa-solid fa-spinner fa-spin"></i> A carregar…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- ══════════════════════════════════════════
+     Modal — Nova Reserva (POST /reserva)
+══════════════════════════════════════════ -->
+<div class="modal-backdrop" id="modal" onclick="closeOnBackdrop(event)">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <h3>Nova Reserva</h3>
+      <button onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <div id="modal-alert" class="alert hidden"></div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Cliente *</label>
+          <select id="f-clienteId">
+            <option value="">— Selecione um Cliente —</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Espaço *</label>
+          <select id="f-espacoId">
+            <option value="">— Selecione um Espaço —</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Data do Evento *</label>
+          <input type="date" id="f-dataEvento"/>
+        </div>
+        <div class="form-group">
+          <label>Hora Início *</label>
+          <input type="time" id="f-horaInicio"/>
+        </div>
+        <div class="form-group">
+          <label>Hora Fim *</label>
+          <input type="time" id="f-horaFim"/>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Nº de Participantes *</label>
+        <input type="number" id="f-numeroParticipantes" min="1" placeholder="Ex: 150"/>
+      </div>
+
+      <div class="form-note">
+        <i class="fa-solid fa-circle-info"></i>
+        O valor total é calculado automaticamente com base no preço/hora do espaço e na duração do evento.
+        O estado inicial é sempre <strong>PENDENTE</strong>.
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeModal()">Cancelar</button>
+      <button class="btn-primary" id="btn-save" onclick="save()">
+        <i class="fa-solid fa-calendar-plus"></i> Criar Reserva
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     Modal — Alterar Estado (PUT /reserva/{id})
+══════════════════════════════════════════ -->
+<div class="modal-backdrop" id="modal-estado" onclick="closeOnBackdrop(event,'modal-estado')">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <h3>Alterar Estado</h3>
+      <button onclick="document.getElementById('modal-estado').classList.remove('show')">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div id="modal-estado-alert" class="alert hidden"></div>
+      <input type="hidden" id="estado-reserva-id"/>
+      <div class="form-group">
+        <label>Novo estado</label>
+        <select id="f-estado">
+          <option value="PENDENTE">PENDENTE</option>
+          <option value="CONFIRMADA">CONFIRMADA</option>
+          <option value="CANCELADA">CANCELADA</option>
+          <option value="CONCLUIDA">CONCLUIDA</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="document.getElementById('modal-estado').classList.remove('show')">Cancelar</button>
+      <button class="btn-primary" onclick="saveEstado()">
+        <i class="fa-solid fa-floppy-disk"></i> Guardar
+      </button>
+    </div>
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/app.js"></script>
+<script>
+checkAuth(); initUI();
+
+// ── Estado global ─────────────────────────────────────────
+let allData = [];        // cache completo de /reserva
+let viewData = [];       // dados actualmente na tabela
+let currentEstado = '';  // filtro de tab activo
+let clientes = [];
+let espacos  = [];
+
+// ── Carga inicial ─────────────────────────────────────────
+async function load() {
+  try {
+    const [reservas, cls, esps] = await Promise.all([
+      API.get('/reserva'),
+      API.get('/cliente'),
+      API.get('/espaco')
+    ]);
+    allData  = reservas;
+    clientes = cls;
+    espacos  = esps;
+
+    // Preenche selects do modal Nova Reserva
+    const selCliente = document.getElementById('f-clienteId');
+    selCliente.innerHTML = '<option value="">— Selecione um Cliente —</option>' +
+      clientes.map(c => `<option value="${c.id}">${c.nome} ${c.apelido}</option>`).join('');
+
+    const selEspaco = document.getElementById('f-espacoId');
+    selEspaco.innerHTML = '<option value="">— Selecione um Espaço —</option>' +
+      espacos.map(e => `<option value="${e.id}">${e.nomeEspaco}</option>`).join('');
+
+    // Preenche select de consulta por cliente
+    const selQCliente = document.getElementById('q-cliente');
+    selQCliente.innerHTML = '<option value="">— Selecione —</option>' +
+      clientes.map(c => `<option value="${c.id}">${c.nome} ${c.apelido}</option>`).join('');
+
+    viewData = allData;
+    render(viewData);
+  } catch (e) {
+    showTableError('tbody', 9, e.message);
+  }
+}
+
+// ── Renderização da tabela ────────────────────────────────
+function render(rows) {
+  const tbody = document.getElementById('tbody');
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="9" class="empty-cell">Sem reservas encontradas</td></tr>';
+    return;
+  }
+  tbody.innerHTML = rows.map(r => `
+    <tr>
+      <td><span class="mono">#${r.id}</span></td>
+      <td><strong>${r.cliente?.nome ?? ''} ${r.cliente?.apelido ?? ''}</strong></td>
+      <td>${r.espaco?.nomeEspaco ?? 'N/A'}</td>
+      <td>${formatDate(r.dataEvento)}</td>
+      <td><span class="mono">${r.horaInicio} – ${r.horaFim}</span></td>
+      <td><i class="fa-solid fa-users"></i> ${r.numeroParticipantes}</td>
+      <td><strong>${formatMZN(r.valorTotal)}</strong></td>
+      <td><span class="badge estado-${r.estado}">${r.estado}</span></td>
+      <td class="col-actions">
+        <button class="btn-icon edit" onclick="openEstadoModal(${r.id},'${r.estado}')" title="Mudar estado">
+          <i class="fa-solid fa-rotate"></i>
+        </button>
+      </td>
+    </tr>`).join('');
+}
+
+// ── Filtros locais (tab + pesquisa de texto) ──────────────
+function filterEstado(btn) {
+  document.querySelectorAll('.etab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  currentEstado = btn.dataset.estado;
+  applyLocalFilters();
+}
+
+function filterData() {
+  applyLocalFilters();
+}
+
+function applyLocalFilters() {
+  const q = document.getElementById('search').value.toLowerCase();
+  render(viewData.filter(r =>
+    (!currentEstado || r.estado === currentEstado) &&
+    (!q || `${r.cliente?.nome} ${r.cliente?.apelido} ${r.espaco?.nomeEspaco}`.toLowerCase().includes(q))
+  ));
+}
+
+// ── Consultas remotas — Capítulo 10 ──────────────────────
+
+/** GET /reserva/{id} */
+async function consultarPorId() {
+  const id = document.getElementById('q-id').value.trim();
+  if (!id) { alert('Introduza um ID válido.'); return; }
+  try {
+    const r = await API.get(`/reserva/${id}`);
+    viewData = [r];
+    mostrarQueryInfo(`Reserva #${id}`);
+    render(viewData);
+  } catch (e) {
+    viewData = [];
+    mostrarQueryInfo(`Reserva #${id} — não encontrada`);
+    render([]);
+  }
+}
+
+/** GET /reserva/data/{dataEvento} */
+async function consultarPorData() {
+  const data = document.getElementById('q-data').value;
+  if (!data) { alert('Selecione uma data.'); return; }
+  try {
+    const lista = await API.get(`/reserva/data/${data}`);
+    viewData = lista;
+    mostrarQueryInfo(`Evento em ${formatDate(data)}`);
+    render(viewData);
+  } catch (e) {
+    // 404 quando não há reservas para essa data
+    viewData = [];
+    mostrarQueryInfo(`Evento em ${formatDate(data)} — sem reservas`);
+    render([]);
+  }
+}
+
+/** GET /reserva/cliente/{clienteId} */
+async function consultarPorCliente() {
+  const clienteId = document.getElementById('q-cliente').value;
+  if (!clienteId) { alert('Selecione um cliente.'); return; }
+  try {
+    const lista = await API.get(`/reserva/cliente/${clienteId}`);
+    const c = clientes.find(x => String(x.id) === String(clienteId));
+    viewData = lista;
+    mostrarQueryInfo(`Cliente: ${c ? c.nome + ' ' + c.apelido : clienteId}`);
+    render(viewData);
+  } catch (e) {
+    viewData = [];
+    render([]);
+  }
+}
+
+/** Repõe a tabela completa */
+function limparConsulta() {
+  viewData = allData;
+  document.getElementById('q-id').value   = '';
+  document.getElementById('q-data').value = '';
+  document.getElementById('q-cliente').value = '';
+  ocultarQueryInfo();
+  // Repõe tab "Todas"
+  document.querySelectorAll('.etab').forEach((b, i) => b.classList.toggle('active', i === 0));
+  currentEstado = '';
+  document.getElementById('search').value = '';
+  render(viewData);
+}
+
+function mostrarQueryInfo(texto) {
+  document.getElementById('query-info-text').textContent = texto;
+  document.getElementById('query-info').style.display = 'block';
+}
+function ocultarQueryInfo() {
+  document.getElementById('query-info').style.display = 'none';
+}
+
+// ── Modal Nova Reserva ────────────────────────────────────
+function openModal() {
+  document.getElementById('f-clienteId').value          = '';
+  document.getElementById('f-espacoId').value           = '';
+  document.getElementById('f-dataEvento').value         = '';
+  document.getElementById('f-horaInicio').value         = '';
+  document.getElementById('f-horaFim').value            = '';
+  document.getElementById('f-numeroParticipantes').value = '';
+  hideModalAlert();
+  document.getElementById('modal').classList.add('show');
+}
+
+/** POST /reserva?clienteId=&espacoId= */
+async function save() {
+  const btn       = document.getElementById('btn-save');
+  const clienteId = document.getElementById('f-clienteId').value;
+  const espacoId  = document.getElementById('f-espacoId').value;
+  const dataEvento        = document.getElementById('f-dataEvento').value;
+  const horaInicio        = document.getElementById('f-horaInicio').value;
+  const horaFim           = document.getElementById('f-horaFim').value;
+  const numeroParticipantes = document.getElementById('f-numeroParticipantes').value;
+
+  // Validação frontend
+  if (!clienteId)           return showModalAlert('Selecione um cliente.');
+  if (!espacoId)            return showModalAlert('Selecione um espaço.');
+  if (!dataEvento)          return showModalAlert('Introduza a data do evento.');
+  if (!horaInicio)          return showModalAlert('Introduza a hora de início.');
+  if (!horaFim)             return showModalAlert('Introduza a hora de fim.');
+  if (!numeroParticipantes) return showModalAlert('Introduza o número de participantes.');
+  if (horaFim <= horaInicio) return showModalAlert('A hora de fim deve ser posterior à hora de início.');
+
+  btn.disabled = true;
+  hideModalAlert();
+
+  const body = {
+    dataEvento,
+    horaInicio: horaInicio + ':00',
+    horaFim:    horaFim    + ':00',
+    numeroParticipantes: parseInt(numeroParticipantes)
+  };
+
+  try {
+    await API.post(`/reserva?clienteId=${clienteId}&espacoId=${espacoId}`, body);
+    closeModal();
+    await load();           // recarrega tudo + limpa filtros
+    limparConsulta();
+  } catch (e) {
+    showModalAlert(e.message);
+    btn.disabled = false;
+  }
+}
+
+// ── Modal Alterar Estado ──────────────────────────────────
+function openEstadoModal(id, estadoActual) {
+  document.getElementById('estado-reserva-id').value = id;
+  document.getElementById('f-estado').value          = estadoActual;
+  document.getElementById('modal-estado-alert').className = 'alert hidden';
+  document.getElementById('modal-estado').classList.add('show');
+}
+
+/** PUT /reserva/{id} */
+async function saveEstado() {
+  const id     = document.getElementById('estado-reserva-id').value;
+  const estado = document.getElementById('f-estado').value;
+  try {
+    await API.put('/reserva/' + id, { estado });
+    document.getElementById('modal-estado').classList.remove('show');
+    await load();
+  } catch (e) {
+    const el = document.getElementById('modal-estado-alert');
+    el.textContent = e.message;
+    el.className   = 'alert error';
+  }
+}
+
+// ── Arranque ──────────────────────────────────────────────
+load();
+</script>
+</body>
+</html>

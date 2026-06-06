@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Clientes — ReservaEspaços Maputo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+<link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+<div class="sidebar-overlay" id="overlay" onclick="closeSidebar()"></div>
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div class="brand">
+      <div class="brand-icon sm"><i class="fa-solid fa-building-columns"></i></div>
+      <div><span class="brand-name">ReservaEspaços</span><span class="brand-sub">Maputo</span></div>
+    </div>
+    <button class="sidebar-close" onclick="closeSidebar()"><i class="fa-solid fa-xmark"></i></button>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section"><span class="nav-label">Principal</span>
+      <a href="dashboard.html" class="nav-item"><i class="fa-solid fa-chart-pie"></i><span>Dashboard</span></a>
+    </div>
+    <div class="nav-section"><span class="nav-label">Gestão</span>
+      <a href="clientes.html" class="nav-item active"><i class="fa-solid fa-users"></i><span>Clientes</span></a>
+      <a href="proprietarios.html" class="nav-item"><i class="fa-solid fa-user-tie"></i><span>Proprietários</span></a>
+      <a href="espacos.html" class="nav-item"><i class="fa-solid fa-building"></i><span>Espaços</span></a>
+    </div>
+    <div class="nav-section"><span class="nav-label">Operações</span>
+      <a href="reservas.html" class="nav-item"><i class="fa-solid fa-calendar-check"></i><span>Reservas</span></a>
+      <a href="pagamentos.html" class="nav-item"><i class="fa-solid fa-credit-card"></i><span>Pagamentos</span></a>
+    </div>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-info"><div class="avatar" id="sidebar-avatar">?</div>
+      <div><div class="user-name" id="sidebar-name">—</div><div class="user-role" id="sidebar-role">—</div></div>
+    </div>
+    <button class="btn-logout" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i></button>
+  </div>
+</aside>
+
+<div class="main-wrapper">
+  <header class="topbar">
+    <button class="hamburger" onclick="openSidebar()"><i class="fa-solid fa-bars"></i></button>
+    <div class="topbar-title"><h2>Clientes</h2><p id="topbar-date"></p></div>
+    <div class="topbar-actions"><div class="badge-role" id="topbar-role"></div></div>
+  </header>
+  <main class="page-content">
+    <div class="page-toolbar">
+      <div class="search-box">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="search" placeholder="Pesquisar por nome ou bairro…" oninput="filterTable()"/>
+      </div>
+      <button class="btn-primary" onclick="openModal()">
+        <i class="fa-solid fa-plus"></i> Novo Cliente
+      </button>
+    </div>
+
+    <div class="card">
+      <div class="table-responsive">
+        <table class="data-table" id="table-clientes">
+          <thead>
+            <tr>
+              <th>ID</th><th>Nome</th><th>Telefone</th><th>Bairro</th>
+              <th>Tipo Doc.</th><th>Nº Doc.</th><th class="col-actions">Acções</th>
+            </tr>
+          </thead>
+          <tbody id="tbody">
+            <tr><td colspan="7" class="loading-cell"><i class="fa-solid fa-spinner fa-spin"></i> A carregar…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Modal -->
+<div class="modal-backdrop" id="modal" onclick="closeOnBackdrop(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modal-title">Novo Cliente</h3>
+      <button onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <div id="modal-alert" class="alert hidden"></div>
+      <input type="hidden" id="edit-id"/>
+      <div class="form-row">
+        <div class="form-group"><label>Nome *</label><input type="text" id="f-nome" required/></div>
+        <div class="form-group"><label>Apelido *</label><input type="text" id="f-apelido" required/></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Telefone *</label><input type="text" id="f-telefone" placeholder="+258 84 000 0000"/></div>
+        <div class="form-group"><label>Bairro *</label><input type="text" id="f-bairro" placeholder="Ex: Polana"/></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Tipo Documento *</label>
+          <select id="f-tipoDocumento">
+            <option value="BI">Bilhete de Identidade (BI)</option>
+            <option value="Passaporte">Passaporte</option>
+            <option value="DIRE">DIRE</option>
+            <option value="Carta de Condução">Carta de Condução</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Nº Documento *</label><input type="text" id="f-numeroDocumento" placeholder="Ex: 1234567890MZ"/></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeModal()">Cancelar</button>
+      <button class="btn-primary" id="btn-save" onclick="save()">
+        <i class="fa-solid fa-floppy-disk"></i> Guardar
+      </button>
+    </div>
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/app.js"></script>
+<script>
+checkAuth(); initUI();
+let data = [];
+
+async function load() {
+  try {
+    data = await API.get('/cliente');
+    render(data);
+  } catch(e) { showTableError('tbody', 7, e.message); }
+}
+
+function render(rows) {
+  const tbody = document.getElementById('tbody');
+  if (!rows.length) { tbody.innerHTML = '<tr><td colspan="7" class="empty-cell">Sem registos</td></tr>'; return; }
+  tbody.innerHTML = rows.map(c => `
+    <tr>
+      <td><span class="mono">#${c.id}</span></td>
+      <td><strong>${c.nome} ${c.apelido}</strong></td>
+      <td>${c.telefone}</td>
+      <td><span class="tag">${c.bairro}</span></td>
+      <td>${c.tipoDocumento}</td>
+      <td><span class="mono">${c.numeroDocumento}</span></td>
+      <td class="col-actions">
+        <button class="btn-icon edit" onclick="openModal(${c.id})" title="Editar"><i class="fa-solid fa-pen-to-square"></i></button>
+        <button class="btn-icon del" onclick="del(${c.id},'${c.nome} ${c.apelido}')" title="Eliminar"><i class="fa-solid fa-trash"></i></button>
+      </td>
+    </tr>`).join('');
+}
+
+function filterTable() {
+  const q = document.getElementById('search').value.toLowerCase();
+  render(data.filter(c =>
+    `${c.nome} ${c.apelido} ${c.bairro} ${c.telefone}`.toLowerCase().includes(q)
+  ));
+}
+
+function openModal(id) {
+  clearForm(['f-nome','f-apelido','f-telefone','f-bairro','f-tipoDocumento','f-numeroDocumento']);
+  document.getElementById('edit-id').value = '';
+  document.getElementById('modal-title').textContent = 'Novo Cliente';
+  if (id) {
+    const c = data.find(x => x.id === id);
+    if (!c) return;
+    document.getElementById('edit-id').value = c.id;
+    document.getElementById('modal-title').textContent = 'Editar Cliente';
+    document.getElementById('f-nome').value = c.nome;
+    document.getElementById('f-apelido').value = c.apelido;
+    document.getElementById('f-telefone').value = c.telefone;
+    document.getElementById('f-bairro').value = c.bairro;
+    document.getElementById('f-tipoDocumento').value = c.tipoDocumento;
+    document.getElementById('f-numeroDocumento').value = c.numeroDocumento;
+  }
+  document.getElementById('modal').classList.add('show');
+}
+
+async function save() {
+  const btn = document.getElementById('btn-save');
+  btn.disabled = true;
+  hideModalAlert();
+  const id = document.getElementById('edit-id').value;
+  const body = {
+    nome: document.getElementById('f-nome').value,
+    apelido: document.getElementById('f-apelido').value,
+    telefone: document.getElementById('f-telefone').value,
+    bairro: document.getElementById('f-bairro').value,
+    tipoDocumento: document.getElementById('f-tipoDocumento').value,
+    numeroDocumento: document.getElementById('f-numeroDocumento').value
+  };
+  try {
+    if (id) await API.put('/cliente/'+id, body);
+    else await API.post('/cliente', body);
+    closeModal(); load();
+  } catch(e) { showModalAlert(e.message); btn.disabled = false; }
+}
+
+async function del(id, nome) {
+  if (!confirm(`Eliminar o cliente "${nome}"?`)) return;
+  try { await API.del('/cliente/'+id); load(); }
+  catch(e) { alert('Erro: ' + e.message); }
+}
+
+load();
+</script>
+</body>
+</html>
