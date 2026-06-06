@@ -299,3 +299,25 @@ Content-Type: application/json
 
 > Adicionar o link público aqui após publicar no GitHub.
 > Adicionar o email momademha@gmail.com como colaborador do repositório.
+
+---
+
+## Troubleshooting
+
+### Erro: "Access Denied" (403)
+- Verifique se incluiu o header `Authorization: Bearer <token>`
+- Confirme que o token não expirou (validade 24h)
+- Verifique se o seu perfil tem permissão para o endpoint
+
+### Erro de conexão MySQL
+- Confirme que o MySQL está em execução: `sudo systemctl status mysql`
+- Verifique as variáveis de ambiente `DB_USERNAME` e `DB_PASSWORD`
+- Confirme que a base de dados foi criada com `CREATE DATABASE reserva_espacos_maputo`
+
+### Porta 8080 ocupada
+```bash
+# Verificar processo na porta
+lsof -i :8080
+# Mudar porta no application.properties
+server.port=8081
+```
