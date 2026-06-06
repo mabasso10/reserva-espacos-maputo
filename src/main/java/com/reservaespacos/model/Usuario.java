@@ -3,10 +3,6 @@ package com.reservaespacos.model;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 
-/**
- * Utilizador do sistema para autenticacao (Spring Security).
- * Perfis: ADMIN, PROPRIETARIO, CLIENTE
- */
 @Entity
 @Table(name = "usuarios")
 public class Usuario {

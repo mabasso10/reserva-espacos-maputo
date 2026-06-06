@@ -1,13 +1,9 @@
 package com.reservaespacos.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 
-/**
- * Entidade Proprietario.
- * Campos conforme especificacao:
- *   id, nome, apelido, telefone, bairro, nuit
- */
 @Entity
 @Table(name = "proprietarios")
 public class Proprietario {
@@ -41,6 +37,16 @@ public class Proprietario {
     @Column(nullable = false, length = 30, unique = true)
     private String nuit;
 
+    /**
+     * Ligação ao Usuario — LAZY para não carregar desnecessariamente.
+     * @JsonIgnore evita que o Jackson tente serializar o proxy Hibernate
+     * fora da sessão JPA (erro "no Session").
+     */
+    @JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "usuario_id")
+    private Usuario usuario;
+
     public Proprietario() {}
 
     public Long getId() { return id; }
@@ -55,4 +61,6 @@ public class Proprietario {
     public void setBairro(String bairro) { this.bairro = bairro; }
     public String getNuit() { return nuit; }
     public void setNuit(String nuit) { this.nuit = nuit; }
+    public Usuario getUsuario() { return usuario; }
+    public void setUsuario(Usuario usuario) { this.usuario = usuario; }
 }

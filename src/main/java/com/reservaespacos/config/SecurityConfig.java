@@ -60,72 +60,46 @@ public class SecurityConfig {
             .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-
-                // ---- Frontend estático ----
                 .requestMatchers(
                     "/", "/index.html", "/dashboard.html",
                     "/clientes.html", "/proprietarios.html", "/espacos.html",
                     "/reservas.html", "/pagamentos.html", "/publico.html",
-                    "/css/**", "/js/**", "/images/**", "/*.html", "/*.css", "/*.js"
+                    "/css/**", "/js/**", "/images/**", "/*.html", "/*.css", "/*.js",
+                    "/uploads/**"   // CORRIGIDO: fotos do disco acessíveis publicamente
                 ).permitAll()
-
-                // ---- H2 Console (só desenvolvimento) ----
                 .requestMatchers("/h2-console/**").permitAll()
-
-                // ---- Swagger / OpenAPI ----
                 .requestMatchers(
                     "/swagger-ui.html", "/swagger-ui/**",
                     "/api-docs/**", "/v3/api-docs/**"
                 ).permitAll()
-
-                // ---- Autenticação pública ----
                 .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
-
-                // ---- Auto-registo público (CLIENTE / PROPRIETARIO) ----
                 .requestMatchers(HttpMethod.POST, "/auth/register").permitAll()
-
-                // ---- Autenticação protegida (requer token) ----
-                // /auth/admin/register → protegido por @PreAuthorize("hasRole('ADMIN')")
-                // /auth/senha          → qualquer utilizador autenticado
-                // /auth/me             → qualquer utilizador autenticado
-                // /auth/utilizadores   → protegido por @PreAuthorize("hasRole('ADMIN')")
                 .requestMatchers("/auth/**").authenticated()
-
-                // ---- Endpoint público de espaços ----
                 .requestMatchers(HttpMethod.GET, "/espaco/publico").permitAll()
-
-                // ---- Clientes ----
                 .requestMatchers(HttpMethod.POST,   "/cliente").hasAnyRole("ADMIN", "CLIENTE")
                 .requestMatchers(HttpMethod.GET,    "/cliente").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.GET,    "/cliente/me").hasAnyRole("ADMIN", "CLIENTE")
                 .requestMatchers(HttpMethod.GET,    "/cliente/**").hasAnyRole("ADMIN", "CLIENTE")
                 .requestMatchers(HttpMethod.PUT,    "/cliente/**").hasAnyRole("ADMIN", "CLIENTE")
                 .requestMatchers(HttpMethod.DELETE, "/cliente/**").hasRole("ADMIN")
-
-                // ---- Proprietários ----
                 .requestMatchers(HttpMethod.POST,   "/proprietario").hasAnyRole("ADMIN", "PROPRIETARIO")
                 .requestMatchers(HttpMethod.GET,    "/proprietario").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.GET,    "/proprietario/me").hasAnyRole("ADMIN", "PROPRIETARIO")
                 .requestMatchers(HttpMethod.GET,    "/proprietario/**").hasAnyRole("ADMIN", "PROPRIETARIO")
                 .requestMatchers(HttpMethod.PUT,    "/proprietario/**").hasAnyRole("ADMIN", "PROPRIETARIO")
                 .requestMatchers(HttpMethod.DELETE, "/proprietario/**").hasRole("ADMIN")
-
-                // ---- Espaços ----
                 .requestMatchers(HttpMethod.GET,    "/espaco").hasAnyRole("ADMIN", "PROPRIETARIO", "CLIENTE")
                 .requestMatchers(HttpMethod.GET,    "/espaco/**").hasAnyRole("ADMIN", "PROPRIETARIO", "CLIENTE")
                 .requestMatchers(HttpMethod.POST,   "/espaco").hasAnyRole("ADMIN", "PROPRIETARIO")
                 .requestMatchers(HttpMethod.PUT,    "/espaco/**").hasAnyRole("ADMIN", "PROPRIETARIO")
                 .requestMatchers(HttpMethod.DELETE, "/espaco/**").hasAnyRole("ADMIN", "PROPRIETARIO")
-
-                // ---- Reservas ----
                 .requestMatchers(HttpMethod.POST,   "/reserva").hasAnyRole("ADMIN", "CLIENTE")
                 .requestMatchers(HttpMethod.GET,    "/reserva").hasAnyRole("ADMIN", "PROPRIETARIO")
                 .requestMatchers(HttpMethod.GET,    "/reserva/**").hasAnyRole("ADMIN", "PROPRIETARIO", "CLIENTE")
                 .requestMatchers(HttpMethod.PUT,    "/reserva/**").hasAnyRole("ADMIN", "PROPRIETARIO")
-
-                // ---- Pagamentos ----
                 .requestMatchers(HttpMethod.POST,   "/pagamento").hasAnyRole("ADMIN", "CLIENTE")
                 .requestMatchers(HttpMethod.GET,    "/pagamento").hasAnyRole("ADMIN", "PROPRIETARIO")
                 .requestMatchers(HttpMethod.GET,    "/pagamento/**").hasAnyRole("ADMIN", "PROPRIETARIO", "CLIENTE")
-
                 .anyRequest().authenticated()
             )
             .authenticationProvider(authenticationProvider())

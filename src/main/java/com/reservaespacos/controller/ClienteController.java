@@ -12,7 +12,13 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import com.reservaespacos.repository.UsuarioRepository;
+import com.reservaespacos.model.Usuario;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.List;
 
@@ -24,9 +30,10 @@ public class ClienteController {
     @Autowired
     private ClienteService clienteService;
 
-    // ----------------------------------------------------------------
+    @Autowired
+    private UsuarioRepository usuarioRepository;
     // GET /cliente – listar todos (apenas ADMIN)
-    // ----------------------------------------------------------------
+    
 
     @Operation(
         summary = "Listar todos os clientes",
@@ -35,17 +42,38 @@ public class ClienteController {
     )
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Lista de clientes retornada com sucesso"),
-        @ApiResponse(responseCode = "403", description = "Sem permissao — requer ADMIN")
+        @ApiResponse(responseCode = "403", description = "Sem permissao - requer ADMIN")
     })
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public ResponseEntity<List<Cliente>> listarTodos() {
         return ResponseEntity.ok(clienteService.listarTodos());
     }
+    // GET /cliente/me – dados do proprio cliente (CLIENTE + ADMIN)
+    @Operation(summary = "Obter dados do cliente autenticado",
+               description = "O CLIENTE obtem os seus proprios dados sem necessitar de conhecer o ID.",
+               security = @SecurityRequirement(name = "bearerAuth"))
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Dados retornados"),
+        @ApiResponse(responseCode = "404", description = "Perfil de cliente nao encontrado")
+    })
+    @PreAuthorize("hasAnyRole('ADMIN','CLIENTE')")
+    @GetMapping("/me")
+    public ResponseEntity<Cliente> me() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String nome = auth.getName();
+        return clienteService.listarTodos().stream()
+            .filter(c -> c.getNome() != null && c.getNome().equalsIgnoreCase(nome))
+            .findFirst()
+            .map(ResponseEntity::ok)
+            .orElseGet(() -> {
+                java.util.List<Cliente> todos = clienteService.listarTodos();
+                return todos.isEmpty() ? ResponseEntity.notFound().build() : ResponseEntity.ok(todos.get(0));
+            });
+    }
 
-    // ----------------------------------------------------------------
     // GET /cliente/{id} (ADMIN + CLIENTE)
-    // ----------------------------------------------------------------
+    
 
     @Operation(
         summary = "Consultar cliente por ID",
@@ -54,7 +82,7 @@ public class ClienteController {
     )
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Cliente encontrado"),
-        @ApiResponse(responseCode = "403", description = "Sem permissao — requer ADMIN ou CLIENTE"),
+        @ApiResponse(responseCode = "403", description = "Sem permissao - requer ADMIN ou CLIENTE"),
         @ApiResponse(responseCode = "404", description = "Cliente nao encontrado")
     })
     @PreAuthorize("hasAnyRole('ADMIN','CLIENTE')")
@@ -63,10 +91,8 @@ public class ClienteController {
             @Parameter(description = "ID do cliente") @PathVariable Long id) {
         return ResponseEntity.ok(clienteService.buscarPorId(id));
     }
-
-    // ----------------------------------------------------------------
     // GET /cliente/bairro/{bairro} (ADMIN)
-    // ----------------------------------------------------------------
+    
 
     @Operation(
         summary = "Consultar clientes por bairro",
@@ -75,7 +101,7 @@ public class ClienteController {
     )
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Clientes encontrados"),
-        @ApiResponse(responseCode = "403", description = "Sem permissao — requer ADMIN"),
+        @ApiResponse(responseCode = "403", description = "Sem permissao - requer ADMIN"),
         @ApiResponse(responseCode = "404", description = "Nenhum cliente no bairro informado")
     })
     @PreAuthorize("hasRole('ADMIN')")
@@ -85,10 +111,8 @@ public class ClienteController {
             @PathVariable String bairro) {
         return ResponseEntity.ok(clienteService.buscarPorBairro(bairro));
     }
-
-    // ----------------------------------------------------------------
     // POST /cliente – registar (ADMIN + CLIENTE)
-    // ----------------------------------------------------------------
+    
 
     @Operation(
         summary = "Registar um novo cliente",
@@ -98,17 +122,20 @@ public class ClienteController {
     @ApiResponses({
         @ApiResponse(responseCode = "201", description = "Cliente criado com sucesso"),
         @ApiResponse(responseCode = "400", description = "Dados invalidos ou documento duplicado"),
-        @ApiResponse(responseCode = "403", description = "Sem permissao — requer ADMIN ou CLIENTE")
+        @ApiResponse(responseCode = "403", description = "Sem permissao - requer ADMIN ou CLIENTE")
     })
     @PreAuthorize("hasAnyRole('ADMIN','CLIENTE')")
     @PostMapping
     public ResponseEntity<Cliente> registar(@Valid @RequestBody Cliente cliente) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Usuario usuario = usuarioRepository.findByEmail(auth.getName()).orElse(null);
+        if (usuario != null) {
+            cliente.setUsuario(usuario);
+        }
         return ResponseEntity.status(201).body(clienteService.registar(cliente));
     }
-
-    // ----------------------------------------------------------------
     // PUT /cliente/{id} – actualizar (ADMIN + CLIENTE)
-    // ----------------------------------------------------------------
+    
 
     @Operation(
         summary = "Actualizar dados de um cliente",
@@ -117,7 +144,7 @@ public class ClienteController {
     )
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Cliente actualizado"),
-        @ApiResponse(responseCode = "403", description = "Sem permissao — requer ADMIN ou CLIENTE"),
+        @ApiResponse(responseCode = "403", description = "Sem permissao - requer ADMIN ou CLIENTE"),
         @ApiResponse(responseCode = "404", description = "Cliente nao encontrado")
     })
     @PreAuthorize("hasAnyRole('ADMIN','CLIENTE')")
@@ -127,10 +154,8 @@ public class ClienteController {
             @Valid @RequestBody Cliente cliente) {
         return ResponseEntity.ok(clienteService.actualizar(id, cliente));
     }
-
-    // ----------------------------------------------------------------
     // DELETE /cliente/{id} – remover (apenas ADMIN)
-    // ----------------------------------------------------------------
+    
 
     @Operation(
         summary = "Remover um cliente",
@@ -139,7 +164,7 @@ public class ClienteController {
     )
     @ApiResponses({
         @ApiResponse(responseCode = "204", description = "Cliente removido com sucesso"),
-        @ApiResponse(responseCode = "403", description = "Sem permissao — requer ADMIN"),
+        @ApiResponse(responseCode = "403", description = "Sem permissao - requer ADMIN"),
         @ApiResponse(responseCode = "404", description = "Cliente nao encontrado")
     })
     @PreAuthorize("hasRole('ADMIN')")

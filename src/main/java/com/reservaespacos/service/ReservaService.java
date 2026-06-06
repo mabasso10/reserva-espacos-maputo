@@ -21,7 +21,6 @@ public class ReservaService {
     @Autowired private ClienteService clienteService;
     @Autowired private EspacoService espacoService;
 
-    /** Registar reserva a partir do DTO */
     public Reserva registar(com.reservaespacos.dto.Dtos.ReservaRequest dto, Long clienteId, Long espacoId) {
         Cliente cliente = clienteService.buscarPorId(clienteId);
         Espaco espaco   = espacoService.buscarPorId(espacoId);
@@ -41,7 +40,25 @@ public class ReservaService {
             throw new RegraDeNegocioException("Hora de fim deve ser posterior a hora de inicio.");
         }
 
-        // Valor total = preco/hora * nº de horas
+        // CORRIGIDO: verificar conflito de horário no mesmo espaço e mesma data
+        boolean conflito = reservaRepository.findByEspacoId(espacoId).stream()
+            .filter(r -> r.getDataEvento().equals(dto.getDataEvento()))
+            .filter(r -> r.getEstado() == Reserva.Estado.PENDENTE
+                      || r.getEstado() == Reserva.Estado.CONFIRMADA)
+            .anyMatch(r ->
+                // sobreposição: novo.inicio < existente.fim && novo.fim > existente.inicio
+                dto.getHoraInicio().isBefore(r.getHoraFim()) &&
+                dto.getHoraFim().isAfter(r.getHoraInicio())
+            );
+
+        if (conflito) {
+            throw new RegraDeNegocioException(
+                "O espaco '" + espaco.getNomeEspaco() + "' ja tem uma reserva confirmada ou pendente " +
+                "para o dia " + dto.getDataEvento() + " nesse intervalo de horário. " +
+                "Escolha outro horário ou outro dia."
+            );
+        }
+
         long horas = java.time.temporal.ChronoUnit.HOURS.between(dto.getHoraInicio(), dto.getHoraFim());
         if (horas <= 0) horas = 1;
         java.math.BigDecimal valorTotal = espaco.getPrecoReserva().multiply(java.math.BigDecimal.valueOf(horas));
@@ -59,7 +76,6 @@ public class ReservaService {
         return reservaRepository.save(reserva);
     }
 
-    /** Actualizar estado da reserva */
     public Reserva atualizarEstado(Long id, String novoEstado) {
         Reserva reserva = buscarPorId(id);
         try {
@@ -73,20 +89,17 @@ public class ReservaService {
         return reservaRepository.save(reserva);
     }
 
-    /** Listar todas */
     @Transactional(readOnly = true)
     public List<Reserva> listarTodas() {
         return reservaRepository.findAll();
     }
 
-    /** Consultar reserva por ID */
     @Transactional(readOnly = true)
     public Reserva buscarPorId(Long id) {
         return reservaRepository.findById(id)
             .orElseThrow(() -> new RecursoNaoEncontradoException("Reserva nao encontrada com ID: " + id));
     }
 
-    /** Consultar reservas por data do evento */
     @Transactional(readOnly = true)
     public List<Reserva> buscarPorDataEvento(LocalDate dataEvento) {
         List<Reserva> lista = reservaRepository.findByDataEvento(dataEvento);
@@ -98,15 +111,12 @@ public class ReservaService {
         return lista;
     }
 
-    /** Consultar reservas por cliente */
     @Transactional(readOnly = true)
     public List<Reserva> buscarPorCliente(Long clienteId) {
-        // Valida se cliente existe
         clienteService.buscarPorId(clienteId);
         return reservaRepository.findByClienteId(clienteId);
     }
 
-    /** Consultar reservas por espaco */
     @Transactional(readOnly = true)
     public List<Reserva> buscarPorEspaco(Long espacoId) {
         espacoService.buscarPorId(espacoId);

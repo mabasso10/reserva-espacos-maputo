@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>ReservaEspaços Maputo — Acesso</title>
+<title>ReservaEspaços Maputo - Acesso</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
@@ -258,7 +258,11 @@ document.getElementById('login-form').addEventListener('submit', async e => {
   try {
     const data = await API.login(email, senha);
     localStorage.setItem('token', data.token);
-    localStorage.setItem('user', JSON.stringify({ nome: data.nome, email: data.email, role: data.role }));
+    localStorage.setItem('user', JSON.stringify({
+      nome: data.nome, email: data.email, role: data.role,
+      clienteId: data.clienteId || null,
+      proprietarioId: data.proprietarioId || null
+    }));
     window.location.href = 'dashboard.html';
   } catch (err) {
     showAlert(err.message || 'Credenciais inválidas. Tente novamente.', 'error');

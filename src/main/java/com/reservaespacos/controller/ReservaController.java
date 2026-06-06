@@ -26,26 +26,22 @@ public class ReservaController {
 
     @Autowired
     private ReservaService reservaService;
-
-    // ----------------------------------------------------------------
     // GET /reserva – listar todas (ADMIN + PROPRIETARIO)
-    // ----------------------------------------------------------------
+    
 
     @Operation(
         summary = "Listar todas as reservas",
         description = "Apenas ADMIN e PROPRIETARIO podem ver todas as reservas.",
         security = @SecurityRequirement(name = "bearerAuth")
     )
-    @ApiResponse(responseCode = "403", description = "Sem permissao — requer ADMIN ou PROPRIETARIO")
+    @ApiResponse(responseCode = "403", description = "Sem permissao - requer ADMIN ou PROPRIETARIO")
     @PreAuthorize("hasAnyRole('ADMIN','PROPRIETARIO')")
     @GetMapping
     public ResponseEntity<List<Reserva>> listarTodas() {
         return ResponseEntity.ok(reservaService.listarTodas());
     }
-
-    // ----------------------------------------------------------------
     // GET /reserva/{id} (ADMIN + PROPRIETARIO + CLIENTE)
-    // ----------------------------------------------------------------
+    
 
     @Operation(
         summary = "Consultar reserva por ID",
@@ -63,10 +59,8 @@ public class ReservaController {
             @Parameter(description = "ID da reserva") @PathVariable Long id) {
         return ResponseEntity.ok(reservaService.buscarPorId(id));
     }
-
-    // ----------------------------------------------------------------
     // GET /reserva/data/{data} (ADMIN + PROPRIETARIO)
-    // ----------------------------------------------------------------
+    
 
     @Operation(
         summary = "Consultar reservas por data do evento",
@@ -80,10 +74,8 @@ public class ReservaController {
             @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataEvento) {
         return ResponseEntity.ok(reservaService.buscarPorDataEvento(dataEvento));
     }
-
-    // ----------------------------------------------------------------
     // GET /reserva/cliente/{clienteId} (ADMIN + PROPRIETARIO + CLIENTE)
-    // ----------------------------------------------------------------
+    
 
     @Operation(
         summary = "Consultar reservas por cliente",
@@ -96,10 +88,8 @@ public class ReservaController {
             @Parameter(description = "ID do cliente") @PathVariable Long clienteId) {
         return ResponseEntity.ok(reservaService.buscarPorCliente(clienteId));
     }
-
-    // ----------------------------------------------------------------
     // GET /reserva/espaco/{espacoId} (ADMIN + PROPRIETARIO)
-    // ----------------------------------------------------------------
+    
 
     @Operation(
         summary = "Consultar reservas por espaco",
@@ -112,10 +102,8 @@ public class ReservaController {
             @Parameter(description = "ID do espaco") @PathVariable Long espacoId) {
         return ResponseEntity.ok(reservaService.buscarPorEspaco(espacoId));
     }
-
-    // ----------------------------------------------------------------
     // POST /reserva – criar reserva (ADMIN + CLIENTE)
-    // ----------------------------------------------------------------
+    
 
     @Operation(
         summary = "Registar uma nova reserva",
@@ -126,7 +114,7 @@ public class ReservaController {
     @ApiResponses({
         @ApiResponse(responseCode = "201", description = "Reserva criada com sucesso"),
         @ApiResponse(responseCode = "400", description = "Dados invalidos ou espaco indisponivel"),
-        @ApiResponse(responseCode = "403", description = "Sem permissao — requer ADMIN ou CLIENTE"),
+        @ApiResponse(responseCode = "403", description = "Sem permissao - requer ADMIN ou CLIENTE"),
         @ApiResponse(responseCode = "404", description = "Cliente ou espaco nao encontrado")
     })
     @PreAuthorize("hasAnyRole('ADMIN','CLIENTE')")
@@ -139,10 +127,8 @@ public class ReservaController {
             reservaService.registar(dto, clienteId, espacoId)
         );
     }
-
-    // ----------------------------------------------------------------
     // PUT /reserva/{id} – actualizar estado (ADMIN + PROPRIETARIO)
-    // ----------------------------------------------------------------
+    
 
     @Operation(
         summary = "Actualizar estado de uma reserva",
@@ -153,7 +139,7 @@ public class ReservaController {
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Estado actualizado com sucesso"),
         @ApiResponse(responseCode = "400", description = "Estado invalido"),
-        @ApiResponse(responseCode = "403", description = "Sem permissao — requer ADMIN ou PROPRIETARIO"),
+        @ApiResponse(responseCode = "403", description = "Sem permissao - requer ADMIN ou PROPRIETARIO"),
         @ApiResponse(responseCode = "404", description = "Reserva nao encontrada")
     })
     @PreAuthorize("hasAnyRole('ADMIN','PROPRIETARIO')")

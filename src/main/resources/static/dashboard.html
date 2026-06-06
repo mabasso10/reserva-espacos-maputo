@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Dashboard — ReservaEspaços Maputo</title>
+<title>Dashboard - ReservaEspaços Maputo</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
@@ -62,8 +62,8 @@
     <div class="user-info" id="sidebar-user">
       <div class="avatar" id="sidebar-avatar">?</div>
       <div>
-        <div class="user-name" id="sidebar-name">—</div>
-        <div class="user-role" id="sidebar-role">—</div>
+        <div class="user-name" id="sidebar-name">-</div>
+        <div class="user-role" id="sidebar-role">-</div>
       </div>
     </div>
     <button class="btn-logout" onclick="logout()" title="Sair">
@@ -94,28 +94,28 @@
         <div class="stat-icon blue"><i class="fa-solid fa-users"></i></div>
         <div class="stat-body">
           <p class="stat-label">Clientes</p>
-          <h3 class="stat-value">—</h3>
+          <h3 class="stat-value">-</h3>
         </div>
       </div>
       <div class="stat-card" id="stat-espacos">
         <div class="stat-icon teal"><i class="fa-solid fa-building"></i></div>
         <div class="stat-body">
           <p class="stat-label">Espaços</p>
-          <h3 class="stat-value">—</h3>
+          <h3 class="stat-value">-</h3>
         </div>
       </div>
       <div class="stat-card" id="stat-reservas">
         <div class="stat-icon amber"><i class="fa-solid fa-calendar-check"></i></div>
         <div class="stat-body">
           <p class="stat-label">Reservas</p>
-          <h3 class="stat-value">—</h3>
+          <h3 class="stat-value">-</h3>
         </div>
       </div>
       <div class="stat-card" id="stat-receita">
         <div class="stat-icon green"><i class="fa-solid fa-money-bill-trend-up"></i></div>
         <div class="stat-body">
           <p class="stat-label">Receita Total</p>
-          <h3 class="stat-value">—</h3>
+          <h3 class="stat-value">-</h3>
         </div>
       </div>
     </div>
@@ -172,81 +172,94 @@ checkAuth();
 initUI();
 
 async function loadDashboard() {
-  try {
-    const [clientes, espacos, reservas, pagamentos] = await Promise.all([
-      API.get('/cliente'),
-      API.get('/espaco'),
-      API.get('/reserva'),
-      API.get('/pagamento')
-    ]);
+  const role = getCurrentRole(); // função de app.js que devolve 'ADMIN','PROPRIETARIO','CLIENTE'
 
-    // Stats
-    setStatValue('stat-clientes', clientes.length);
-    setStatValue('stat-espacos', espacos.length);
-    setStatValue('stat-reservas', reservas.length);
-    const receita = pagamentos.reduce((s, p) => s + parseFloat(p.valorPago || 0), 0);
-    setStatValue('stat-receita', formatMZN(receita));
+  // CORRIGIDO: cada chamada é independente — falha parcial não derruba o dashboard inteiro.
+  // PROPRIETARIO não tem acesso a /cliente nem /pagamento → são simplesmente ignorados.
 
-    // Reservas recentes (últimas 5)
-    const rec = reservas.slice(-5).reverse();
-    document.getElementById('recent-reservas').innerHTML = rec.length
-      ? rec.map(r => `
-        <div class="list-row">
-          <div class="list-main">
-            <span class="list-title">${r.espaco?.nomeEspaco || 'Espaço #' + r.espaco?.id}</span>
-            <span class="list-sub">${r.cliente?.nome} ${r.cliente?.apelido || ''}</span>
-          </div>
-          <div class="list-side">
-            <span class="badge estado-${r.estado}">${r.estado}</span>
-            <span class="list-date">${formatDate(r.dataEvento)}</span>
-          </div>
-        </div>`).join('')
-      : '<p class="empty-msg">Sem reservas</p>';
+  let clientes = [], espacos = [], reservas = [], pagamentos = [];
 
-    // Espaços disponíveis
-    const disp = espacos.filter(e => e.disponibilidade).slice(0, 5);
-    document.getElementById('avail-espacos').innerHTML = disp.length
-      ? disp.map(e => `
-        <div class="list-row">
-          <div class="list-main">
-            <span class="list-title">${e.nomeEspaco}</span>
-            <span class="list-sub">${e.bairro} · ${e.tipoEvento}</span>
-          </div>
-          <div class="list-side">
-            <span class="list-cap"><i class="fa-solid fa-users"></i> ${e.capacidade}</span>
-            <span class="list-price">${formatMZN(e.precoReserva)}</span>
-          </div>
-        </div>`).join('')
-      : '<p class="empty-msg">Sem espaços disponíveis</p>';
+  // /espaco: todos os roles têm acesso
+  try { espacos = await API.get('/espaco'); } catch(e) { console.warn('/espaco', e.message); }
 
-    // Estado chart
-    const estados = { PENDENTE: 0, CONFIRMADA: 0, CANCELADA: 0, CONCLUIDA: 0 };
-    reservas.forEach(r => { if (estados[r.estado] !== undefined) estados[r.estado]++; });
-    const total = reservas.length || 1;
-    const colors = { PENDENTE:'#F59E0B', CONFIRMADA:'#10B981', CANCELADA:'#EF4444', CONCLUIDA:'#6366F1' };
-    document.getElementById('estado-chart').innerHTML = Object.entries(estados).map(([k, v]) => `
-      <div class="estado-item">
-        <div class="estado-header">
-          <span class="dot" style="background:${colors[k]}"></span>
-          <span class="estado-name">${k}</span>
-          <span class="estado-count">${v}</span>
-        </div>
-        <div class="estado-bar-bg">
-          <div class="estado-bar" style="width:${Math.round(v/total*100)}%;background:${colors[k]}"></div>
-        </div>
-        <span class="estado-pct">${Math.round(v/total*100)}%</span>
-      </div>`).join('');
+  // /reserva: ADMIN e PROPRIETARIO; CLIENTE não vê a lista global
+  try { reservas = await API.get('/reserva'); } catch(e) { console.warn('/reserva', e.message); }
 
-  } catch (err) {
-    console.error(err);
+  // /cliente: só ADMIN
+  if (role === 'ADMIN') {
+    try { clientes = await API.get('/cliente'); } catch(e) { console.warn('/cliente', e.message); }
   }
+
+  // /pagamento: ADMIN e PROPRIETARIO
+  if (role === 'ADMIN' || role === 'PROPRIETARIO') {
+    try { pagamentos = await API.get('/pagamento'); } catch(e) { console.warn('/pagamento', e.message); }
+  }
+
+  // Stats — oculta cards sem permissão em vez de mostrar "-"
+  setStatValue('stat-clientes', role === 'ADMIN' ? clientes.length : '—');
+  setStatValue('stat-espacos', espacos.length);
+  setStatValue('stat-reservas', reservas.length);
+  const receita = pagamentos.reduce((s, p) => s + parseFloat(p.valorPago || 0), 0);
+  setStatValue('stat-receita', (role === 'ADMIN' || role === 'PROPRIETARIO') ? formatMZN(receita) : '—');
+
+  // Reservas recentes (últimas 5)
+  const rec = reservas.slice(-5).reverse();
+  document.getElementById('recent-reservas').innerHTML = rec.length
+    ? rec.map(r => `
+      <div class="list-row">
+        <div class="list-main">
+          <span class="list-title">${r.espaco?.nomeEspaco || 'Espaço #' + r.espaco?.id}</span>
+          <span class="list-sub">${r.cliente?.nome || ''} ${r.cliente?.apelido || ''}</span>
+        </div>
+        <div class="list-side">
+          <span class="badge estado-${r.estado}">${r.estado}</span>
+          <span class="list-date">${formatDate(r.dataEvento)}</span>
+        </div>
+      </div>`).join('')
+    : '<p class="empty-msg">Sem reservas visíveis para o seu perfil</p>';
+
+  // Espaços disponíveis
+  const disp = espacos.filter(e => e.disponibilidade).slice(0, 5);
+  document.getElementById('avail-espacos').innerHTML = disp.length
+    ? disp.map(e => `
+      <div class="list-row">
+        <div class="list-main">
+          <span class="list-title">${e.nomeEspaco}</span>
+          <span class="list-sub">${e.bairro} · ${e.tipoEvento}</span>
+        </div>
+        <div class="list-side">
+          <span class="list-cap"><i class="fa-solid fa-users"></i> ${e.capacidade}</span>
+          <span class="list-price">${formatMZN(e.precoReserva)}</span>
+        </div>
+      </div>`).join('')
+    : '<p class="empty-msg">Sem espaços disponíveis</p>';
+
+  // Estado chart
+  const estados = { PENDENTE: 0, CONFIRMADA: 0, CANCELADA: 0, CONCLUIDA: 0 };
+  reservas.forEach(r => { if (estados[r.estado] !== undefined) estados[r.estado]++; });
+  const total = reservas.length || 1;
+  const colors = { PENDENTE:'#F59E0B', CONFIRMADA:'#10B981', CANCELADA:'#EF4444', CONCLUIDA:'#6366F1' };
+  document.getElementById('estado-chart').innerHTML = Object.entries(estados).map(([k, v]) => `
+    <div class="estado-item">
+      <div class="estado-header">
+        <span class="dot" style="background:${colors[k]}"></span>
+        <span class="estado-name">${k}</span>
+        <span class="estado-count">${v}</span>
+      </div>
+      <div class="estado-bar-bg">
+        <div class="estado-bar" style="width:${Math.round(v/total*100)}%;background:${colors[k]}"></div>
+      </div>
+      <span class="estado-pct">${Math.round(v/total*100)}%</span>
+    </div>`).join('');
 }
 
 function setStatValue(id, val) {
-  document.querySelector(`#${id} .stat-value`).textContent = val;
+  const el = document.querySelector(`#${id} .stat-value`);
+  if (el) el.textContent = val;
 }
 
 loadDashboard();
+
 </script>
 </body>
 </html>

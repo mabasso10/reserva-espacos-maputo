@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Proprietários — ReservaEspaços Maputo</title>
+<title>Proprietários - ReservaEspaços Maputo</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
@@ -36,7 +36,7 @@
   </nav>
   <div class="sidebar-footer">
     <div class="user-info"><div class="avatar" id="sidebar-avatar">?</div>
-      <div><div class="user-name" id="sidebar-name">—</div><div class="user-role" id="sidebar-role">—</div></div>
+      <div><div class="user-name" id="sidebar-name">-</div><div class="user-role" id="sidebar-role">-</div></div>
     </div>
     <button class="btn-logout" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i></button>
   </div>
@@ -104,17 +104,66 @@
 <script>
 checkAuth(); initUI();
 let data = [];
+const user = JSON.parse(localStorage.getItem('user') || '{}');
+const role = (user.role || '').toUpperCase();
 
 async function load() {
   try {
-    data = await API.get('/proprietario');
-    render(data);
-  } catch(e) { showTableError('tbody', 6, e.message); }
+    if (role === 'ADMIN') {
+      // ADMIN vê todos os proprietários
+      data = await API.get('/proprietario');
+      render(data);
+    } else if (role === 'PROPRIETARIO') {
+      // PROPRIETARIO vê apenas o seu próprio perfil
+      try {
+        const prop = await API.get('/proprietario/me');
+        data = [prop];
+        // Guardar proprietarioId no localStorage
+        if (prop.id && !user.proprietarioId) {
+          user.proprietarioId = prop.id;
+          localStorage.setItem('user', JSON.stringify(user));
+        }
+        render(data);
+      } catch(e) {
+        // 404 = perfil ainda não criado → mostrar tabela vazia e aviso
+        data = [];
+        render(data);
+        mostrarAvisoSemPerfil();
+      }
+      // PROPRIETARIO não pode eliminar — esconder botões de delete via CSS
+      document.querySelectorAll('.btn-icon.del').forEach(b => b.style.display = 'none');
+    } else {
+      // CLIENTE — só leitura, sem acesso a esta página
+      document.querySelector('.page-toolbar')?.remove();
+      data = await API.get('/espaco'); // fallback seguro
+      render([]);
+    }
+  } catch(e) {
+    showTableError('tbody', 6, e.message);
+  }
+}
+
+function mostrarAvisoSemPerfil() {
+  const existing = document.getElementById('aviso-sem-perfil');
+  if (existing) return;
+  const aviso = document.createElement('div');
+  aviso.id = 'aviso-sem-perfil';
+  aviso.className = 'alert';
+  aviso.style.cssText = 'margin:16px 0;padding:14px 18px;background:var(--warning-bg,#fff8e1);border:1px solid var(--warning,#f59e0b);border-radius:8px;color:var(--text-main)';
+  aviso.innerHTML = '<i class="fa-solid fa-circle-info"></i> <strong>Perfil ainda não criado.</strong> Clique em <strong>"Novo Proprietário"</strong> para completar o seu registo antes de poder adicionar espaços.';
+  document.querySelector('.page-toolbar')?.insertAdjacentElement('afterend', aviso);
 }
 
 function render(rows) {
   const tbody = document.getElementById('tbody');
-  if (!rows.length) { tbody.innerHTML = '<tr><td colspan="6" class="empty-cell">Sem registos</td></tr>'; return; }
+  // Esconder botão delete para PROPRIETARIO
+  if (role === 'PROPRIETARIO') {
+    document.querySelectorAll('.btn-icon.del').forEach(b => b.style.display = 'none');
+  }
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="6" class="empty-cell">Sem registos</td></tr>';
+    return;
+  }
   tbody.innerHTML = rows.map(p => `
     <tr>
       <td><span class="mono">#${p.id}</span></td>
@@ -124,7 +173,7 @@ function render(rows) {
       <td><span class="mono">${p.nuit}</span></td>
       <td class="col-actions">
         <button class="btn-icon edit" onclick="openModal(${p.id})"><i class="fa-solid fa-pen-to-square"></i></button>
-        <button class="btn-icon del" onclick="del(${p.id},'${p.nome} ${p.apelido}')"><i class="fa-solid fa-trash"></i></button>
+        ${role === 'ADMIN' ? `<button class="btn-icon del" onclick="del(${p.id},'${p.nome} ${p.apelido}')"><i class="fa-solid fa-trash"></i></button>` : ''}
       </td>
     </tr>`).join('');
 }
@@ -138,16 +187,17 @@ function openModal(id) {
   clearForm(['f-nome','f-apelido','f-telefone','f-bairro','f-nuit']);
   document.getElementById('edit-id').value = '';
   document.getElementById('modal-title').textContent = 'Novo Proprietário';
+  hideModalAlert();
   if (id) {
     const p = data.find(x => x.id === id);
     if (!p) return;
     document.getElementById('edit-id').value = p.id;
     document.getElementById('modal-title').textContent = 'Editar Proprietário';
-    document.getElementById('f-nome').value = p.nome;
-    document.getElementById('f-apelido').value = p.apelido;
+    document.getElementById('f-nome').value     = p.nome;
+    document.getElementById('f-apelido').value  = p.apelido;
     document.getElementById('f-telefone').value = p.telefone;
-    document.getElementById('f-bairro').value = p.bairro;
-    document.getElementById('f-nuit').value = p.nuit;
+    document.getElementById('f-bairro').value   = p.bairro;
+    document.getElementById('f-nuit').value     = p.nuit;
   }
   document.getElementById('modal').classList.add('show');
 }
@@ -157,22 +207,37 @@ async function save() {
   btn.disabled = true; hideModalAlert();
   const id = document.getElementById('edit-id').value;
   const body = {
-    nome: document.getElementById('f-nome').value,
-    apelido: document.getElementById('f-apelido').value,
-    telefone: document.getElementById('f-telefone').value,
-    bairro: document.getElementById('f-bairro').value,
-    nuit: document.getElementById('f-nuit').value
+    nome:     document.getElementById('f-nome').value.trim(),
+    apelido:  document.getElementById('f-apelido').value.trim(),
+    telefone: document.getElementById('f-telefone').value.trim(),
+    bairro:   document.getElementById('f-bairro').value.trim(),
+    nuit:     document.getElementById('f-nuit').value.trim()
   };
+  if (!body.nome || !body.apelido || !body.telefone || !body.bairro || !body.nuit) {
+    showModalAlert('Preencha todos os campos obrigatórios.');
+    btn.disabled = false; return;
+  }
   try {
-    if (id) await API.put('/proprietario/'+id, body);
-    else await API.post('/proprietario', body);
+    let saved;
+    if (id) {
+      saved = await API.put('/proprietario/' + id, body);
+    } else {
+      saved = await API.post('/proprietario', body);
+      // Após criar o perfil, guardar o ID no localStorage
+      if (saved?.id && role === 'PROPRIETARIO') {
+        user.proprietarioId = saved.id;
+        localStorage.setItem('user', JSON.stringify(user));
+        // Remover aviso de sem perfil se existir
+        document.getElementById('aviso-sem-perfil')?.remove();
+      }
+    }
     closeModal(); load();
   } catch(e) { showModalAlert(e.message); btn.disabled = false; }
 }
 
 async function del(id, nome) {
   if (!confirm(`Eliminar o proprietário "${nome}"?`)) return;
-  try { await API.del('/proprietario/'+id); load(); }
+  try { await API.del('/proprietario/' + id); load(); }
   catch(e) { alert('Erro: ' + e.message); }
 }
 

@@ -1,8 +1,8 @@
 // ============================================================
-//  app.js — Funções partilhadas de UI
+//  app.js - Funções partilhadas de UI
 // ============================================================
 
-/** Verifica autenticação — redireciona para login se não autenticado */
+/** Verifica autenticação - redireciona para login se não autenticado */
 function checkAuth() {
     if (!localStorage.getItem('token')) {
         window.location.href = '/index.html';
@@ -17,8 +17,30 @@ function logout() {
 
 /** Inicializa UI comum (sidebar user info, data, role badge) */
 function initUI() {
-    const raw = localStorage.getItem('user');
-    if (!raw) return;
+    const raw   = localStorage.getItem('user');
+    const token = localStorage.getItem('token');
+
+    // CORRIGIDO: validar token antes de mostrar dados de sessão anterior.
+    // Se o token não existir ou estiver expirado (verificação de exp no payload),
+    // limpar o localStorage e redirecionar — evita mostrar dados de sessão anterior.
+    if (!raw || !token) { localStorage.clear(); return; }
+
+    // Verificar expiração do JWT sem biblioteca — basta ler o payload (base64)
+    try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        if (payload.exp && payload.exp * 1000 < Date.now()) {
+            // Token expirado — forçar novo login
+            localStorage.clear();
+            window.location.href = '/index.html';
+            return;
+        }
+    } catch (_) {
+        // Token malformado — limpar igualmente
+        localStorage.clear();
+        window.location.href = '/index.html';
+        return;
+    }
+
     const user = JSON.parse(raw);
 
     // Sidebar
@@ -110,7 +132,7 @@ function showTableError(tbodyId, cols, msg) {
 
 /** Formata valor em MZN */
 function formatMZN(val) {
-    if (val === null || val === undefined) return '—';
+    if (val === null || val === undefined) return '-';
     return new Intl.NumberFormat('pt-MZ', {
         style: 'currency', currency: 'MZN', minimumFractionDigits: 2
     }).format(parseFloat(val));
@@ -118,7 +140,20 @@ function formatMZN(val) {
 
 /** Formata data */
 function formatDate(dateStr) {
-    if (!dateStr) return '—';
+    if (!dateStr) return '-';
     const d = new Date(dateStr + 'T00:00:00');
     return d.toLocaleDateString('pt-MZ', { day: '2-digit', month: '2-digit', year: 'numeric' });
+}
+
+/**
+ * Devolve o role do utilizador autenticado ('ADMIN', 'PROPRIETARIO', 'CLIENTE')
+ * a partir do localStorage. Usado para controlo condicional de UI por role.
+ */
+function getCurrentRole() {
+    try {
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        return (user.role || '').replace('ROLE_', '').toUpperCase();
+    } catch (e) {
+        return '';
+    }
 }

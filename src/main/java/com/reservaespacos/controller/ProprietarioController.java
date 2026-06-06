@@ -1,6 +1,8 @@
 package com.reservaespacos.controller;
 
 import com.reservaespacos.model.Proprietario;
+import com.reservaespacos.model.Usuario;
+import com.reservaespacos.repository.UsuarioRepository;
 import com.reservaespacos.service.ProprietarioService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -12,6 +14,8 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,39 +28,46 @@ public class ProprietarioController {
     @Autowired
     private ProprietarioService proprietarioService;
 
-    // ----------------------------------------------------------------
-    // GET /proprietario – listar todos (apenas ADMIN)
-    // ----------------------------------------------------------------
+    @Autowired
+    private UsuarioRepository usuarioRepository;
 
-    @Operation(
-        summary = "Listar todos os proprietarios",
-        description = "Apenas ADMIN pode ver a lista completa de proprietarios.",
-        security = @SecurityRequirement(name = "bearerAuth")
-    )
-    @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Lista de proprietarios retornada com sucesso"),
-        @ApiResponse(responseCode = "403", description = "Sem permissao — requer ADMIN")
-    })
+    @Operation(summary = "Listar todos os proprietarios", security = @SecurityRequirement(name = "bearerAuth"))
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public ResponseEntity<List<Proprietario>> listarTodos() {
         return ResponseEntity.ok(proprietarioService.listarTodos());
     }
 
-    // ----------------------------------------------------------------
-    // GET /proprietario/{id} (ADMIN + PROPRIETARIO)
-    // ----------------------------------------------------------------
-
+    /**
+     * GET /proprietario/me
+     * Devolve o perfil de Proprietario do utilizador autenticado.
+     * A ligação é feita por usuario_id — fiável e sem ambiguidade.
+     */
     @Operation(
-        summary = "Buscar proprietario por ID",
-        description = "ADMIN pode consultar qualquer proprietario. PROPRIETARIO pode consultar os seus proprios dados.",
+        summary = "Obter dados do proprietario autenticado",
+        description = "Devolve o registo de Proprietario associado ao token JWT em uso.",
         security = @SecurityRequirement(name = "bearerAuth")
     )
     @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Proprietario encontrado"),
-        @ApiResponse(responseCode = "403", description = "Sem permissao — requer ADMIN ou PROPRIETARIO"),
-        @ApiResponse(responseCode = "404", description = "Proprietario nao encontrado")
+        @ApiResponse(responseCode = "200", description = "Dados retornados"),
+        @ApiResponse(responseCode = "404", description = "Perfil de proprietario nao encontrado")
     })
+    @PreAuthorize("hasAnyRole('ADMIN','PROPRIETARIO')")
+    @GetMapping("/me")
+    public ResponseEntity<Proprietario> me() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String email = auth.getName();
+
+        Usuario usuario = usuarioRepository.findByEmail(email)
+            .orElse(null);
+        if (usuario == null) return ResponseEntity.notFound().build();
+
+        return proprietarioService.buscarPorUsuarioId(usuario.getId())
+            .map(ResponseEntity::ok)
+            .orElse(ResponseEntity.notFound().build());
+    }
+
+    @Operation(summary = "Buscar proprietario por ID", security = @SecurityRequirement(name = "bearerAuth"))
     @PreAuthorize("hasAnyRole('ADMIN','PROPRIETARIO')")
     @GetMapping("/{id}")
     public ResponseEntity<Proprietario> buscarPorId(
@@ -64,40 +75,32 @@ public class ProprietarioController {
         return ResponseEntity.ok(proprietarioService.buscarPorId(id));
     }
 
-    // ----------------------------------------------------------------
-    // POST /proprietario – registar (ADMIN + PROPRIETARIO)
-    // ----------------------------------------------------------------
-
+    /**
+     * POST /proprietario
+     * Ao registar, associa automaticamente o Usuario autenticado ao perfil.
+     */
     @Operation(
         summary = "Registar um novo proprietario",
-        description = "ADMIN e PROPRIETARIO podem criar um registo de proprietario.",
+        description = "Cria o perfil de Proprietario e associa-o ao utilizador autenticado.",
         security = @SecurityRequirement(name = "bearerAuth")
     )
     @ApiResponses({
         @ApiResponse(responseCode = "201", description = "Proprietario criado com sucesso"),
         @ApiResponse(responseCode = "400", description = "Dados invalidos ou NUIT duplicado"),
-        @ApiResponse(responseCode = "403", description = "Sem permissao — requer ADMIN ou PROPRIETARIO")
+        @ApiResponse(responseCode = "403", description = "Sem permissao")
     })
     @PreAuthorize("hasAnyRole('ADMIN','PROPRIETARIO')")
     @PostMapping
     public ResponseEntity<Proprietario> registar(@Valid @RequestBody Proprietario proprietario) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Usuario usuario = usuarioRepository.findByEmail(auth.getName()).orElse(null);
+        if (usuario != null) {
+            proprietario.setUsuario(usuario);
+        }
         return ResponseEntity.status(201).body(proprietarioService.registar(proprietario));
     }
 
-    // ----------------------------------------------------------------
-    // PUT /proprietario/{id} – actualizar (ADMIN + PROPRIETARIO)
-    // ----------------------------------------------------------------
-
-    @Operation(
-        summary = "Actualizar dados de um proprietario",
-        description = "ADMIN pode actualizar qualquer proprietario. PROPRIETARIO pode actualizar os seus proprios dados.",
-        security = @SecurityRequirement(name = "bearerAuth")
-    )
-    @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Proprietario actualizado"),
-        @ApiResponse(responseCode = "403", description = "Sem permissao — requer ADMIN ou PROPRIETARIO"),
-        @ApiResponse(responseCode = "404", description = "Proprietario nao encontrado")
-    })
+    @Operation(summary = "Actualizar dados de um proprietario", security = @SecurityRequirement(name = "bearerAuth"))
     @PreAuthorize("hasAnyRole('ADMIN','PROPRIETARIO')")
     @PutMapping("/{id}")
     public ResponseEntity<Proprietario> actualizar(
@@ -106,20 +109,7 @@ public class ProprietarioController {
         return ResponseEntity.ok(proprietarioService.actualizar(id, proprietario));
     }
 
-    // ----------------------------------------------------------------
-    // DELETE /proprietario/{id} – remover (apenas ADMIN)
-    // ----------------------------------------------------------------
-
-    @Operation(
-        summary = "Remover um proprietario",
-        description = "Apenas ADMIN pode remover proprietarios.",
-        security = @SecurityRequirement(name = "bearerAuth")
-    )
-    @ApiResponses({
-        @ApiResponse(responseCode = "204", description = "Proprietario removido com sucesso"),
-        @ApiResponse(responseCode = "403", description = "Sem permissao — requer ADMIN"),
-        @ApiResponse(responseCode = "404", description = "Proprietario nao encontrado")
-    })
+    @Operation(summary = "Remover um proprietario", security = @SecurityRequirement(name = "bearerAuth"))
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> remover(

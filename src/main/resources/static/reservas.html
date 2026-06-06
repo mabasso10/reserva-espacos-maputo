@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Reservas — ReservaEspaços Maputo</title>
+<title>Reservas - ReservaEspaços Maputo</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
@@ -79,7 +79,7 @@
   </nav>
   <div class="sidebar-footer">
     <div class="user-info"><div class="avatar" id="sidebar-avatar">?</div>
-      <div><div class="user-name" id="sidebar-name">—</div><div class="user-role" id="sidebar-role">—</div></div>
+      <div><div class="user-name" id="sidebar-name">-</div><div class="user-role" id="sidebar-role">-</div></div>
     </div>
     <button class="btn-logout" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i></button>
   </div>
@@ -95,7 +95,7 @@
   <main class="page-content">
 
     <!-- ══════════════════════════════════════════
-         BARRA DE CONSULTAS — Capítulo 10
+         BARRA DE CONSULTAS - Capítulo 10
          POST /reserva            → modal abaixo
          GET  /reserva/{id}       → por ID
          GET  /reserva/data/{d}   → por data
@@ -128,7 +128,7 @@
       <div class="query-group">
         <label><i class="fa-solid fa-user"></i> Consultar por Cliente</label>
         <select id="q-cliente">
-          <option value="">— Selecione —</option>
+          <option value="">- Selecione -</option>
         </select>
       </div>
       <button class="btn-query" onclick="consultarPorCliente()">
@@ -188,7 +188,7 @@
 </div>
 
 <!-- ══════════════════════════════════════════
-     Modal — Nova Reserva (POST /reserva)
+     Modal - Nova Reserva (POST /reserva)
 ══════════════════════════════════════════ -->
 <div class="modal-backdrop" id="modal" onclick="closeOnBackdrop(event)">
   <div class="modal modal-lg">
@@ -203,13 +203,13 @@
         <div class="form-group">
           <label>Cliente *</label>
           <select id="f-clienteId">
-            <option value="">— Selecione um Cliente —</option>
+            <option value="">- Selecione um Cliente -</option>
           </select>
         </div>
         <div class="form-group">
           <label>Espaço *</label>
           <select id="f-espacoId">
-            <option value="">— Selecione um Espaço —</option>
+            <option value="">- Selecione um Espaço -</option>
           </select>
         </div>
       </div>
@@ -250,7 +250,7 @@
 </div>
 
 <!-- ══════════════════════════════════════════
-     Modal — Alterar Estado (PUT /reserva/{id})
+     Modal - Alterar Estado (PUT /reserva/{id})
 ══════════════════════════════════════════ -->
 <div class="modal-backdrop" id="modal-estado" onclick="closeOnBackdrop(event,'modal-estado')">
   <div class="modal modal-sm">
@@ -295,36 +295,50 @@ let clientes = [];
 let espacos  = [];
 
 // ── Carga inicial ─────────────────────────────────────────
+let modalDataLoaded = false; // carregar dados do modal apenas quando necessário
+
 async function load() {
   try {
-    const [reservas, cls, esps] = await Promise.all([
-      API.get('/reserva'),
-      API.get('/cliente'),
-      API.get('/espaco')
-    ]);
-    allData  = reservas;
-    clientes = cls;
-    espacos  = esps;
-
-    // Preenche selects do modal Nova Reserva
-    const selCliente = document.getElementById('f-clienteId');
-    selCliente.innerHTML = '<option value="">— Selecione um Cliente —</option>' +
-      clientes.map(c => `<option value="${c.id}">${c.nome} ${c.apelido}</option>`).join('');
-
-    const selEspaco = document.getElementById('f-espacoId');
-    selEspaco.innerHTML = '<option value="">— Selecione um Espaço —</option>' +
-      espacos.map(e => `<option value="${e.id}">${e.nomeEspaco}</option>`).join('');
-
-    // Preenche select de consulta por cliente
-    const selQCliente = document.getElementById('q-cliente');
-    selQCliente.innerHTML = '<option value="">— Selecione —</option>' +
-      clientes.map(c => `<option value="${c.id}">${c.nome} ${c.apelido}</option>`).join('');
-
+    // Carregar apenas as reservas na carga inicial — não exige ADMIN
+    allData = await API.get('/reserva');
     viewData = allData;
     render(viewData);
+
+    // Carregar espaços (acessível a PROPRIETARIO e ADMIN) em background
+    try {
+      espacos = await API.get('/espaco');
+    } catch(_) { /* ignora se sem permissão */ }
   } catch (e) {
     showTableError('tbody', 9, e.message);
   }
+}
+
+// Carrega clientes e espaços para o modal — apenas quando abre e só se ADMIN
+async function loadModalData() {
+  if (modalDataLoaded) return;
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const role = (user.role || '').toUpperCase();
+
+  try { espacos = await API.get('/espaco'); } catch(_) {}
+
+  if (role === 'ADMIN') {
+    try {
+      clientes = await API.get('/cliente');
+      const selCliente = document.getElementById('f-clienteId');
+      selCliente.innerHTML = '<option value="">- Selecione um Cliente -</option>' +
+        clientes.map(c => `<option value="${c.id}">${c.nome} ${c.apelido}</option>`).join('');
+
+      const selQCliente = document.getElementById('q-cliente');
+      selQCliente.innerHTML = '<option value="">- Selecione -</option>' +
+        clientes.map(c => `<option value="${c.id}">${c.nome} ${c.apelido}</option>`).join('');
+    } catch(_) {}
+  }
+
+  const selEspaco = document.getElementById('f-espacoId');
+  selEspaco.innerHTML = '<option value="">- Selecione um Espaço -</option>' +
+    espacos.map(e => `<option value="${e.id}">${e.nomeEspaco}</option>`).join('');
+
+  modalDataLoaded = true;
 }
 
 // ── Renderização da tabela ────────────────────────────────
@@ -372,7 +386,7 @@ function applyLocalFilters() {
   ));
 }
 
-// ── Consultas remotas — Capítulo 10 ──────────────────────
+// ── Consultas remotas - Capítulo 10 ──────────────────────
 
 /** GET /reserva/{id} */
 async function consultarPorId() {
@@ -385,7 +399,7 @@ async function consultarPorId() {
     render(viewData);
   } catch (e) {
     viewData = [];
-    mostrarQueryInfo(`Reserva #${id} — não encontrada`);
+    mostrarQueryInfo(`Reserva #${id} - não encontrada`);
     render([]);
   }
 }
@@ -402,7 +416,7 @@ async function consultarPorData() {
   } catch (e) {
     // 404 quando não há reservas para essa data
     viewData = [];
-    mostrarQueryInfo(`Evento em ${formatDate(data)} — sem reservas`);
+    mostrarQueryInfo(`Evento em ${formatDate(data)} - sem reservas`);
     render([]);
   }
 }
@@ -446,7 +460,7 @@ function ocultarQueryInfo() {
 }
 
 // ── Modal Nova Reserva ────────────────────────────────────
-function openModal() {
+async function openModal() {
   document.getElementById('f-clienteId').value          = '';
   document.getElementById('f-espacoId').value           = '';
   document.getElementById('f-dataEvento').value         = '';
@@ -455,6 +469,7 @@ function openModal() {
   document.getElementById('f-numeroParticipantes').value = '';
   hideModalAlert();
   document.getElementById('modal').classList.add('show');
+  await loadModalData(); // lazy — só carrega na primeira abertura
 }
 
 /** POST /reserva?clienteId=&espacoId= */
@@ -489,10 +504,12 @@ async function save() {
   try {
     await API.post(`/reserva?clienteId=${clienteId}&espacoId=${espacoId}`, body);
     closeModal();
-    await load();           // recarrega tudo + limpa filtros
+    await load();
     limparConsulta();
   } catch (e) {
     showModalAlert(e.message);
+  } finally {
+    // CORRIGIDO: btn sempre reactivado independentemente do fluxo
     btn.disabled = false;
   }
 }

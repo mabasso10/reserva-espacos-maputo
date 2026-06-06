@@ -1,20 +1,20 @@
-# Sistema de Gestão e Reserva de Espaços para Eventos — Maputo
+# Sistema de Gestao e Reserva de Espacos para Eventos - Maputo
 
-> **Disciplina:** Engenharia de Software · **Curso:** ETSI 4º Ano · **Avaliação:** Segunda Avaliação  
-> **Tema:** Azarias Mahumane — Desenvolvimento de Sistema de Gestão e Reserva de Espaços para Eventos na Cidade de Maputo  
+> **Disciplina:** Engenharia de Software · **Curso:** ETSI 4o Ano · **Avaliacao:** Segunda Avaliacao
+> **Tema:** Azarias Mahumane - Desenvolvimento de Sistema de Gestao e Reserva de Espacos para Eventos na Cidade de Maputo
 > **Data de entrega:** 05/06/2026
 
 ---
 
 ## Sobre o Projecto
 
-Sistema REST API desenvolvido em **Java + Spring Boot** para gerir e reservar espaços para eventos que acontecem na cidade de Maputo. Suporta autenticação JWT e controlo de acesso por perfis (ADMIN, PROPRIETÁRIO, CLIENTE).
+Sistema REST API desenvolvido em **Java + Spring Boot** para gerir e reservar espacos para eventos na cidade de Maputo. Suporta autenticacao JWT e controlo de acesso por perfis (ADMIN, PROPRIETARIO, CLIENTE).
 
 ---
 
 ## Tecnologias Utilizadas
 
-| Tecnologia | Versão |
+| Tecnologia | Versao |
 |---|---|
 | Java | 17 |
 | Spring Boot | 3.2.5 |
@@ -37,11 +37,11 @@ reserva-espacos-maputo/
 │       │   ├── controller/      # AuthController, ClienteController, ProprietarioController,
 │       │   │                    # EspacoController, ReservaController, PagamentoController
 │       │   ├── dto/             # Dtos (LoginRequest, LoginResponse, AlterarSenhaRequest, etc.)
-│       │   ├── exception/       # GlobalExceptionHandler, excepções customizadas
+│       │   ├── exception/       # GlobalExceptionHandler, excepcoes customizadas
 │       │   ├── model/           # Cliente, Proprietario, Espaco, Reserva, Pagamento, Usuario
 │       │   ├── repository/      # Interfaces Spring Data JPA
 │       │   ├── security/        # JwtUtils, JwtAuthFilter, UsuarioDetailsService
-│       │   └── service/         # Lógica de negócio (AuthService, ClienteService, ...)
+│       │   └── service/         # Logica de negocio (AuthService, ClienteService, ...)
 │       └── resources/
 │           ├── application.properties
 │           ├── dados_teste.sql
@@ -53,15 +53,15 @@ reserva-espacos-maputo/
 
 ## Como Executar
 
-### Pré-requisitos
+### Pre-requisitos
 - Java 17+
 - MySQL 8+
 - Maven 3+
 
-### 1. Clonar o repositório
+### 1. Clonar o repositorio
 
 ```bash
-git clone https://github.com/<SEU_USUARIO>/reserva-espacos-maputo.git
+git clone https://github.com/mabasso10/reserva-espacos-maputo.git
 cd reserva-espacos-maputo
 ```
 
@@ -71,7 +71,7 @@ cd reserva-espacos-maputo
 CREATE DATABASE reserva_espacos_maputo CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
-### 3. Configurar credenciais MySQL via variáveis de ambiente
+### 3. Configurar credenciais MySQL via variaveis de ambiente
 
 ```bash
 # Linux / macOS
@@ -89,28 +89,28 @@ $env:DB_PASSWORD="a_sua_senha_mysql"
 mvn spring-boot:run
 ```
 
-A aplicação inicia em `http://localhost:8080`.
+A aplicacao inicia em `http://localhost:8080`.
 
 ---
 
 ## Credencial Inicial (ADMIN)
 
-Ao iniciar pela primeira vez, é criado **apenas** o utilizador administrador:
+Ao iniciar pela primeira vez, e criado automaticamente o utilizador administrador:
 
-| Perfil | Email | Senha inicial |
+| Perfil | Email | Senha |
 |---|---|---|
-| ADMIN | admin@reservas.mz | **engenharia de software2026** |
+| ADMIN | admin@reservas.mz | engsoft2026! |
 
-> ⚠️ **IMPORTANTE:** Altere a senha imediatamente após o primeiro login via `PUT /auth/senha`.
+> Altere a senha apos o primeiro login via `PUT /auth/senha`.
 
-Para criar utilizadores PROPRIETARIO e CLIENTE, utilize a API:
-`POST /auth/register` (requer token ADMIN)
+Para criar utilizadores PROPRIETARIO e CLIENTE, use a API:
+`POST /auth/register`
 
 ---
 
-## Documentação (Swagger)
+## Documentacao (Swagger)
 
-Aceder após iniciar a aplicação:
+Aceder apos iniciar a aplicacao:
 
 ```
 http://localhost:8080/swagger-ui.html
@@ -119,7 +119,7 @@ http://localhost:8080/swagger-ui.html
 **Como autenticar no Swagger:**
 1. Execute **POST /auth/login** com email e senha
 2. Copie o valor do campo `token` da resposta
-3. Clique no botão **Authorize** (cadeado) no topo da página
+3. Clique no botao **Authorize** (cadeado) no topo da pagina
 4. Cole o token no campo **bearerAuth** e clique "Authorize"
 5. Todos os endpoints protegidos passam a funcionar
 
@@ -127,26 +127,26 @@ http://localhost:8080/swagger-ui.html
 
 ## Endpoints Principais
 
-### Autenticação
-| Método | Endpoint | Acesso | Descrição |
+### Autenticacao
+| Metodo | Endpoint | Acesso | Descricao |
 |---|---|---|---|
-| POST | `/auth/login` | Público | Login — retorna token JWT |
-| POST | `/auth/register` | ADMIN | Criar novo utilizador |
-| PUT | `/auth/senha` | Autenticado | Alterar própria senha |
+| POST | `/auth/login` | Publico | Login - retorna token JWT |
+| POST | `/auth/register` | Publico | Criar novo utilizador |
+| PUT | `/auth/senha` | Autenticado | Alterar propria senha |
 | GET | `/auth/me` | Autenticado | Perfil do utilizador actual |
 | GET | `/auth/utilizadores` | ADMIN | Listar todos os utilizadores |
 
 ### Cliente
-| Método | Endpoint | Acesso |
+| Metodo | Endpoint | Acesso |
 |---|---|---|
 | GET | `/cliente` | ADMIN |
-| GET | `/cliente/{bairro}` | ADMIN, CLIENTE |
+| GET | `/cliente/{id}` | ADMIN, CLIENTE |
 | POST | `/cliente` | ADMIN, CLIENTE |
 | PUT | `/cliente/{id}` | ADMIN, CLIENTE |
 | DELETE | `/cliente/{id}` | ADMIN |
 
-### Proprietário
-| Método | Endpoint | Acesso |
+### Proprietario
+| Metodo | Endpoint | Acesso |
 |---|---|---|
 | GET | `/proprietario` | ADMIN |
 | GET | `/proprietario/{id}` | ADMIN, PROPRIETARIO |
@@ -154,11 +154,11 @@ http://localhost:8080/swagger-ui.html
 | PUT | `/proprietario/{id}` | ADMIN, PROPRIETARIO |
 | DELETE | `/proprietario/{id}` | ADMIN |
 
-### Espaço
-| Método | Endpoint | Acesso |
+### Espaco
+| Metodo | Endpoint | Acesso |
 |---|---|---|
 | GET | `/espaco` | Autenticado |
-| GET | `/espaco/publico` | Público |
+| GET | `/espaco/publico` | Publico |
 | GET | `/espaco/{id}` | Autenticado |
 | GET | `/espaco/proprietario/{proprietarioId}` | Autenticado |
 | GET | `/espaco/tipo/{tipoEvento}` | Autenticado |
@@ -168,7 +168,7 @@ http://localhost:8080/swagger-ui.html
 | POST | `/espaco/{id}/foto` | ADMIN, PROPRIETARIO |
 
 ### Reserva
-| Método | Endpoint | Acesso |
+| Metodo | Endpoint | Acesso |
 |---|---|---|
 | GET | `/reserva` | ADMIN, PROPRIETARIO |
 | GET | `/reserva/{id}` | Autenticado |
@@ -179,7 +179,7 @@ http://localhost:8080/swagger-ui.html
 | PUT | `/reserva/{id}` | ADMIN, PROPRIETARIO |
 
 ### Pagamento
-| Método | Endpoint | Acesso |
+| Metodo | Endpoint | Acesso |
 |---|---|---|
 | GET | `/pagamento` | ADMIN, PROPRIETARIO |
 | GET | `/pagamento/{id}` | Autenticado |
@@ -191,24 +191,23 @@ http://localhost:8080/swagger-ui.html
 ## Estados da Reserva
 
 ```
-PENDENTE → CONFIRMADA → CONCLUIDA
-         → CANCELADA
+PENDENTE -> CONFIRMADA -> CONCLUIDA
+         -> CANCELADA
 ```
 
-> O sistema confirma automaticamente a reserva quando o pagamento cobre o valor total.
+O sistema confirma automaticamente a reserva quando o pagamento cobre o valor total.
 
 ---
 
-## Segurança
+## Seguranca
 
-- Autenticação via **JWT (JSON Web Token)** — tokens com validade de **24 horas**
-- Perfis: **ADMIN** (acesso total), **PROPRIETARIO** (gerir espaços e reservas), **CLIENTE** (reservas e pagamentos)
-- Criação de utilizadores apenas pelo ADMIN
+- Autenticacao via **JWT (JSON Web Token)** com validade de **24 horas**
+- Perfis: **ADMIN** (acesso total), **PROPRIETARIO** (gerir espacos e reservas), **CLIENTE** (reservas e pagamentos)
 - Senhas encriptadas com **BCrypt**
 
 ---
 
-## Exemplos de Uso com Postman
+## Exemplos de Uso
 
 ### 1. Login
 ```json
@@ -217,18 +216,18 @@ Content-Type: application/json
 
 {
   "email": "admin@reservas.mz",
-  "senha": "engenharia de software2026"
+  "senha": "engsoft2026!"
 }
 ```
 
-### 2. Alterar senha (obrigatório após primeiro login)
+### 2. Alterar senha
 ```json
 PUT /auth/senha
 Authorization: Bearer <token>
 Content-Type: application/json
 
 {
-  "senhaActual": "engenharia de software2026",
+  "senhaActual": "engsoft2026!",
   "novaSenha": "MinhaNovaS3nh@"
 }
 ```
@@ -276,24 +275,24 @@ Content-Type: application/json
 
 ---
 
-## Participação
+## Discente
 
-| Nome | Participação |
+| Nome | Participacao |
 |---|---|
 | Azarias Mahumane | 100% |
 
 ---
 
-## Entregáveis
+## Entregaveis
 
-- [x] Código fonte no GitHub (este repositório)
+- [x] Codigo fonte no GitHub (este repositorio)
 - [x] Swagger / OpenAPI em `http://localhost:8080/swagger-ui.html`
 - [x] Base de dados com dados de teste (DataLoader + `dados_teste.sql`)
-- [ ] Word document com Diagrama ER, exemplos de testes Postman e link do repositório
+- [ ] Word document com Diagrama ER, exemplos de testes Postman e link do repositorio
 
 ---
 
-## Link do Repositório GitHub
+## Link do Repositorio GitHub
 
 https://github.com/mabasso10/reserva-espacos-maputo
 
@@ -305,17 +304,16 @@ https://github.com/mabasso10/reserva-espacos-maputo
 
 ### Erro: "Access Denied" (403)
 - Verifique se incluiu o header `Authorization: Bearer <token>`
-- Confirme que o token não expirou (validade 24h)
-- Verifique se o seu perfil tem permissão para o endpoint
+- Confirme que o token nao expirou (validade 24h)
+- Verifique se o seu perfil tem permissao para o endpoint
 
-### Erro de conexão MySQL
-- Confirme que o MySQL está em execução: `sudo systemctl status mysql`
-- Verifique as variáveis de ambiente `DB_USERNAME` e `DB_PASSWORD`
+### Erro de conexao MySQL
+- Confirme que o MySQL esta em execucao: `sudo systemctl status mysql`
+- Verifique as variaveis de ambiente `DB_USERNAME` e `DB_PASSWORD`
 - Confirme que a base de dados foi criada com `CREATE DATABASE reserva_espacos_maputo`
 
 ### Porta 8080 ocupada
 ```bash
-# Verificar processo na porta
 lsof -i :8080
 # Mudar porta no application.properties
 server.port=8081

@@ -17,7 +17,6 @@ public class ClienteService {
     @Autowired
     private ClienteRepository clienteRepository;
 
-    /** Registar cliente */
     public Cliente registar(Cliente cliente) {
         if (clienteRepository.existsByNumeroDocumento(cliente.getNumeroDocumento())) {
             throw new RegraDeNegocioException(
@@ -27,7 +26,6 @@ public class ClienteService {
         return clienteRepository.save(cliente);
     }
 
-    /** Actualizar dados de cliente */
     public Cliente actualizar(Long id, Cliente dadosNovos) {
         Cliente cliente = buscarPorId(id);
         cliente.setNome(dadosNovos.getNome());
@@ -35,7 +33,6 @@ public class ClienteService {
         cliente.setTelefone(dadosNovos.getTelefone());
         cliente.setBairro(dadosNovos.getBairro());
         cliente.setTipoDocumento(dadosNovos.getTipoDocumento());
-        // Numero de documento so muda se for diferente e nao duplicado
         if (!cliente.getNumeroDocumento().equals(dadosNovos.getNumeroDocumento())) {
             if (clienteRepository.existsByNumeroDocumento(dadosNovos.getNumeroDocumento())) {
                 throw new RegraDeNegocioException(
@@ -47,26 +44,22 @@ public class ClienteService {
         return clienteRepository.save(cliente);
     }
 
-    /** Remover um cliente */
     public void remover(Long id) {
         Cliente cliente = buscarPorId(id);
         clienteRepository.delete(cliente);
     }
 
-    /** Consultar todos */
     @Transactional(readOnly = true)
     public List<Cliente> listarTodos() {
         return clienteRepository.findAll();
     }
 
-    /** Consultar cliente por ID */
     @Transactional(readOnly = true)
     public Cliente buscarPorId(Long id) {
         return clienteRepository.findById(id)
             .orElseThrow(() -> new RecursoNaoEncontradoException("Cliente nao encontrado com ID: " + id));
     }
 
-    /** Consultar clientes por bairro */
     @Transactional(readOnly = true)
     public List<Cliente> buscarPorBairro(String bairro) {
         List<Cliente> lista = clienteRepository.findByBairroIgnoreCase(bairro);

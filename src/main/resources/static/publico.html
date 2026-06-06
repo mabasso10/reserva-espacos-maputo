@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>ReservaEspaços Maputo — Encontre o espaço perfeito para o seu evento</title>
+<title>ReservaEspaços Maputo - Encontre o espaço perfeito para o seu evento</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
@@ -655,11 +655,11 @@ body {
       <p class="hero-sub">Encontre e reserve salas, auditórios, salões e muito mais. Disponibilidade em tempo real, confirmação imediata.</p>
       <div class="hero-stats">
         <div class="hero-stat">
-          <span class="hero-stat-num" id="stat-total">—</span>
+          <span class="hero-stat-num" id="stat-total">-</span>
           <span class="hero-stat-label">Espaços</span>
         </div>
         <div class="hero-stat">
-          <span class="hero-stat-num" id="stat-disp">—</span>
+          <span class="hero-stat-num" id="stat-disp">-</span>
           <span class="hero-stat-label">Disponíveis hoje</span>
         </div>
         <div class="hero-stat">
@@ -679,10 +679,10 @@ body {
           <div class="hero-card-img"><i class="fa-solid fa-building"></i></div>
           <div class="hero-card-info">
             <div class="hero-card-tipo">A carregar…</div>
-            <div class="hero-card-nome">—</div>
+            <div class="hero-card-nome">-</div>
             <div class="hero-card-meta">
-              <span><i class="fa-solid fa-users"></i> —</span>
-              <span><i class="fa-solid fa-tag"></i> —</span>
+              <span><i class="fa-solid fa-users"></i> -</span>
+              <span><i class="fa-solid fa-tag"></i> -</span>
             </div>
           </div>
           <div class="hero-card-avail">Disponível</div>
@@ -790,7 +790,7 @@ body {
     </div>
   </div>
   <div class="footer-bottom">
-    &copy; 2026 ReservaEspaços Maputo — Universidade Joaquim Chissano
+    &copy; 2026 ReservaEspaços Maputo - Universidade Joaquim Chissano
   </div>
 </footer>
 
@@ -856,7 +856,7 @@ body {
         </div>
         <div class="form-group">
           <label class="form-label">Valor estimado</label>
-          <div id="r-valor" style="font-family:'Playfair Display',serif; font-size:24px; font-weight:700; color:var(--green); padding:8px 0;">— MZN</div>
+          <div id="r-valor" style="font-family:'Playfair Display',serif; font-size:24px; font-weight:700; color:var(--green); padding:8px 0;">- MZN</div>
           <p class="form-note">Calculado com base no preço/hora e duração do evento.</p>
         </div>
       </div>
@@ -986,11 +986,22 @@ function renderCards(lista) {
       'Reuniao':'🤝','Outro':'🏛️'
     }[e.tipoEvento] || '🏢';
 
+    // CORRIGIDO: usar foto real se disponível; emoji apenas como fallback
+    const primeiraFoto = e.fotos && e.fotos.length > 0 ? e.fotos[0]
+                       : e.foto ? e.foto
+                       : null;
+    const mediaHtml = primeiraFoto
+      ? `<img src="/uploads/${primeiraFoto}" alt="${e.nomeEspaco}"
+              style="width:100%;height:100%;object-fit:cover;"
+              onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"
+         /><span class="card-img-emoji" style="display:none">${emoji}</span>`
+      : `<span class="card-img-emoji">${emoji}</span>`;
+
     return `
     <div class="espaco-card ${e.disponibilidade ? '' : 'indisponivel'} card-anim"
          style="animation-delay:${i*0.06}s">
       <div class="card-img">
-        <span class="card-img-emoji">${emoji}</span>
+        ${mediaHtml}
         <span class="card-tipo-badge ${tipoCls}">${e.tipoEvento}</span>
         <span class="card-avail-badge ${e.disponibilidade ? 'avail-sim' : 'avail-nao'}">
           ${e.disponibilidade ? '✓ Disponível' : '✗ Indisponível'}
@@ -1029,8 +1040,19 @@ function abrirDetalhe(id) {
   const emoji = {'Casamento':'💍','Conferencia':'🎤','Festa':'🎉','Reuniao':'🤝','Outro':'🏛️'}[e.tipoEvento] || '🏢';
   const tipoCls = {'Casamento':'badge-casamento','Conferencia':'badge-conferencia','Festa':'badge-festa','Reuniao':'badge-reuniao','Outro':'badge-outro'}[e.tipoEvento] || 'badge-outro';
 
+  // CORRIGIDO: painel de detalhe também usa foto real se existir
+  const primeiraFotoDetalhe = e.fotos && e.fotos.length > 0 ? e.fotos[0]
+                            : e.foto ? e.foto
+                            : null;
+  const detalheMediaHtml = primeiraFotoDetalhe
+    ? `<img src="/uploads/${primeiraFotoDetalhe}" alt="${e.nomeEspaco}"
+            style="width:100%;height:200px;object-fit:cover;border-radius:12px;margin-bottom:12px;"
+            onerror="this.outerHTML='<div class=\'detail-img\'>${emoji}</div>'"
+       />`
+    : `<div class="detail-img">${emoji}</div>`;
+
   document.getElementById('detail-body').innerHTML = `
-    <div class="detail-img">${emoji}</div>
+    ${detalheMediaHtml}
     <div class="detail-title">${e.nomeEspaco}</div>
     <div class="detail-meta">
       <span class="detail-badge ${tipoCls}">${e.tipoEvento}</span>
@@ -1040,7 +1062,7 @@ function abrirDetalhe(id) {
     <div class="detail-grid">
       <div class="detail-item">
         <div class="detail-item-label">Bairro</div>
-        <div class="detail-item-val">${e.bairro || '—'}</div>
+        <div class="detail-item-val">${e.bairro || '-'}</div>
       </div>
       <div class="detail-item">
         <div class="detail-item-label">Capacidade</div>
@@ -1106,7 +1128,7 @@ function abrirReserva(id) {
     document.getElementById('r-participantes').value = '';
     document.getElementById('r-inicio').value = '';
     document.getElementById('r-fim').value = '';
-    document.getElementById('r-valor').textContent = '— MZN';
+    document.getElementById('r-valor').textContent = '- MZN';
     // Calcular valor ao mudar horas
     ['r-inicio','r-fim'].forEach(id => {
       document.getElementById(id).addEventListener('change', calcularValor);
@@ -1120,7 +1142,7 @@ function calcularValor() {
   if (!espacoSelecionado) return;
   const inicio = document.getElementById('r-inicio').value;
   const fim = document.getElementById('r-fim').value;
-  if (!inicio || !fim) { document.getElementById('r-valor').textContent = '— MZN'; return; }
+  if (!inicio || !fim) { document.getElementById('r-valor').textContent = '- MZN'; return; }
   const [h1,m1] = inicio.split(':').map(Number);
   const [h2,m2] = fim.split(':').map(Number);
   const horas = ((h2*60+m2) - (h1*60+m1)) / 60;
@@ -1159,22 +1181,30 @@ async function confirmarReserva() {
     const horas = ((h2*60+m2) - (h1*60+m1)) / 60;
     const valorTotal = horas * espacoSelecionado.precoReserva;
 
-    // Buscar cliente pelo email
-    const clientes = await authFetch('/cliente');
-    const cliente = clientes.find(c => c.email === user.email || c.nome === user.nome);
+    // Obter clienteId — guardado no login; se não existir tentar /cliente/me
+    let clienteId = user.clienteId;
+    if (!clienteId) {
+      const clienteMe = await authFetch('/cliente/me');
+      clienteId = clienteMe.id;
+      // Persistir para não repetir a chamada
+      user.clienteId = clienteId;
+      localStorage.setItem('user', JSON.stringify(user));
+    }
 
-    if (!cliente) {
-      mostrarAlertaReserva('Cliente não encontrado. Contacte o suporte.', 'error');
+    if (!clienteId) {
+      mostrarAlertaReserva('Perfil de cliente não encontrado. Contacte o suporte.', 'error');
       btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-calendar-check"></i> Confirmar Reserva'; return;
     }
 
+    // Payload: campos do ReservaRequest no body; IDs como query params
     const body = {
-      dataEvento: data, horaInicio: inicio, horaFim: fim,
-      numeroParticipantes: partic, valorTotal,
-      espaco: { id: espacoSelecionado.id },
-      cliente: { id: cliente.id }
+      dataEvento: data,
+      horaInicio: inicio,
+      horaFim: fim,
+      numeroParticipantes: partic,
+      valorTotal
     };
-    await authFetch('/reserva', 'POST', body);
+    await authFetch(`/reserva?clienteId=${clienteId}&espacoId=${espacoSelecionado.id}`, 'POST', body);
     fecharReserva();
     mostrarToast('✓ Reserva efectuada com sucesso! Estado: PENDENTE', 'success');
   } catch(e) {

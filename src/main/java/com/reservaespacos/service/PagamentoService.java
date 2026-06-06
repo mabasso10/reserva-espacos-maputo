@@ -20,11 +20,6 @@ public class PagamentoService {
     @Autowired private PagamentoRepository pagamentoRepository;
     @Autowired private ReservaService reservaService;
 
-    /**
-     * Registar pagamento a partir do DTO.
-     * Se valorPago >= valorTotal da reserva e estado == PENDENTE,
-     * a reserva e automaticamente CONFIRMADA.
-     */
     public Pagamento registar(Dtos.PagamentoRequest dto, Long reservaId) {
         Reserva reserva = reservaService.buscarPorId(reservaId);
 
@@ -40,7 +35,6 @@ public class PagamentoService {
         pagamento.setDataPagamento(dto.getDataPagamento());
         pagamento.setMetodoPagamento(dto.getMetodoPagamento());
 
-        // Confirmação automática ao pagar o valor total
         if (dto.getValorPago().compareTo(reserva.getValorTotal()) >= 0
                 && reserva.getEstado() == Reserva.Estado.PENDENTE) {
             reservaService.atualizarEstado(reservaId, "CONFIRMADA");
@@ -49,13 +43,11 @@ public class PagamentoService {
         return pagamentoRepository.save(pagamento);
     }
 
-    /** Listar todos os pagamentos */
     @Transactional(readOnly = true)
     public List<Pagamento> listarTodos() {
         return pagamentoRepository.findAll();
     }
 
-    /** Consultar pagamento por ID */
     @Transactional(readOnly = true)
     public Pagamento buscarPorId(Long id) {
         return pagamentoRepository.findById(id)
@@ -63,7 +55,6 @@ public class PagamentoService {
                 "Pagamento nao encontrado com ID: " + id));
     }
 
-    /** Consultar pagamentos por data */
     @Transactional(readOnly = true)
     public List<Pagamento> buscarPorData(LocalDate data) {
         List<Pagamento> lista = pagamentoRepository.findByDataPagamento(data);

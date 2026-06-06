@@ -26,26 +26,22 @@ public class PagamentoController {
 
     @Autowired
     private PagamentoService pagamentoService;
-
-    // ----------------------------------------------------------------
     // GET /pagamento – listar todos (ADMIN + PROPRIETARIO)
-    // ----------------------------------------------------------------
+    
 
     @Operation(
         summary = "Listar todos os pagamentos",
         description = "Apenas ADMIN e PROPRIETARIO podem ver todos os pagamentos.",
         security = @SecurityRequirement(name = "bearerAuth")
     )
-    @ApiResponse(responseCode = "403", description = "Sem permissao — requer ADMIN ou PROPRIETARIO")
+    @ApiResponse(responseCode = "403", description = "Sem permissao - requer ADMIN ou PROPRIETARIO")
     @PreAuthorize("hasAnyRole('ADMIN','PROPRIETARIO')")
     @GetMapping
     public ResponseEntity<List<Pagamento>> listarTodos() {
         return ResponseEntity.ok(pagamentoService.listarTodos());
     }
-
-    // ----------------------------------------------------------------
     // GET /pagamento/{id} (ADMIN + PROPRIETARIO + CLIENTE)
-    // ----------------------------------------------------------------
+    
 
     @Operation(
         summary = "Consultar pagamento por ID",
@@ -63,10 +59,8 @@ public class PagamentoController {
             @Parameter(description = "ID do pagamento") @PathVariable Long id) {
         return ResponseEntity.ok(pagamentoService.buscarPorId(id));
     }
-
-    // ----------------------------------------------------------------
     // GET /pagamento/data/{data} (ADMIN + PROPRIETARIO)
-    // ----------------------------------------------------------------
+    
 
     @Operation(
         summary = "Consultar pagamentos por data",
@@ -75,7 +69,7 @@ public class PagamentoController {
     )
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Pagamentos encontrados"),
-        @ApiResponse(responseCode = "403", description = "Sem permissao — requer ADMIN ou PROPRIETARIO"),
+        @ApiResponse(responseCode = "403", description = "Sem permissao - requer ADMIN ou PROPRIETARIO"),
         @ApiResponse(responseCode = "404", description = "Nenhum pagamento na data indicada")
     })
     @PreAuthorize("hasAnyRole('ADMIN','PROPRIETARIO')")
@@ -85,10 +79,8 @@ public class PagamentoController {
             @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataPagamento) {
         return ResponseEntity.ok(pagamentoService.buscarPorData(dataPagamento));
     }
-
-    // ----------------------------------------------------------------
     // POST /pagamento – registar (ADMIN + CLIENTE)
-    // ----------------------------------------------------------------
+    
 
     @Operation(
         summary = "Registar um pagamento",
@@ -99,7 +91,7 @@ public class PagamentoController {
     @ApiResponses({
         @ApiResponse(responseCode = "201", description = "Pagamento registado com sucesso"),
         @ApiResponse(responseCode = "400", description = "Dados invalidos ou reserva cancelada"),
-        @ApiResponse(responseCode = "403", description = "Sem permissao — requer ADMIN ou CLIENTE"),
+        @ApiResponse(responseCode = "403", description = "Sem permissao - requer ADMIN ou CLIENTE"),
         @ApiResponse(responseCode = "404", description = "Reserva nao encontrada")
     })
     @PreAuthorize("hasAnyRole('ADMIN','CLIENTE')")

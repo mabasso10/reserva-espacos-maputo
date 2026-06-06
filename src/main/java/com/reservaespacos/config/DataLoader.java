@@ -11,15 +11,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-/**
- * Carrega dados iniciais na BD ao iniciar a aplicação pela primeira vez.
- * Só executa se a tabela de utilizadores estiver vazia.
- *
- * CREDENCIAIS INICIAIS:
- *   admin@reservas.mz / ALTERE_ESTA_SENHA
- *
- * IMPORTANTE: Altere a senha do admin imediatamente após o primeiro login.
- */
 @Component
 public class DataLoader implements CommandLineRunner {
 
@@ -33,74 +24,109 @@ public class DataLoader implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        if (usuarioRepo.count() > 0) return; // Evita duplicados em cada reinício
+        if (usuarioRepo.count() > 0) return;
 
-        // ================================================================
-        // UTILIZADOR ADMINISTRADOR - ÚNICO CRIADO AUTOMATICAMENTE
-        // Altere a senha após o primeiro login
-        // ================================================================
+        // ── ADMIN ────────────────────────────────────────────────────────────
         Usuario admin = new Usuario();
         admin.setNome("Administrador do Sistema");
         admin.setEmail("admin@reservas.mz");
-        admin.setSenha(encoder.encode("ALTERE_ESTA_SENHA"));
+        admin.setSenha(encoder.encode("engsoft2026!"));
         admin.setRole(Usuario.Role.ADMIN);
         usuarioRepo.save(admin);
 
-        // ================================================================
-        // CLIENTES - dados reais de Maputo
-        // ================================================================
+        // ── USUARIOS para os CLIENTES de seed ────────────────────────────────
+        Usuario uArmindo = new Usuario();
+        uArmindo.setNome("Armindo"); uArmindo.setEmail("armindo@reservas.mz");
+        uArmindo.setSenha(encoder.encode("senha12345")); uArmindo.setRole(Usuario.Role.CLIENTE);
+        usuarioRepo.save(uArmindo);
+
+        Usuario uEsperanca = new Usuario();
+        uEsperanca.setNome("Esperanca"); uEsperanca.setEmail("esperanca@reservas.mz");
+        uEsperanca.setSenha(encoder.encode("senha12345")); uEsperanca.setRole(Usuario.Role.CLIENTE);
+        usuarioRepo.save(uEsperanca);
+
+        Usuario uHelder = new Usuario();
+        uHelder.setNome("Helder"); uHelder.setEmail("helder@reservas.mz");
+        uHelder.setSenha(encoder.encode("senha12345")); uHelder.setRole(Usuario.Role.CLIENTE);
+        usuarioRepo.save(uHelder);
+
+        Usuario uLurdes = new Usuario();
+        uLurdes.setNome("Lurdes"); uLurdes.setEmail("lurdes@reservas.mz");
+        uLurdes.setSenha(encoder.encode("senha12345")); uLurdes.setRole(Usuario.Role.CLIENTE);
+        usuarioRepo.save(uLurdes);
+
+        Usuario uOsvaldo = new Usuario();
+        uOsvaldo.setNome("Osvaldo"); uOsvaldo.setEmail("osvaldo@reservas.mz");
+        uOsvaldo.setSenha(encoder.encode("senha12345")); uOsvaldo.setRole(Usuario.Role.CLIENTE);
+        usuarioRepo.save(uOsvaldo);
+
+        // ── USUARIOS para os PROPRIETARIOS de seed ───────────────────────────
+        Usuario uJoaquim = new Usuario();
+        uJoaquim.setNome("Joaquim"); uJoaquim.setEmail("joaquim@reservas.mz");
+        uJoaquim.setSenha(encoder.encode("senha12345")); uJoaquim.setRole(Usuario.Role.PROPRIETARIO);
+        usuarioRepo.save(uJoaquim);
+
+        Usuario uCeleste = new Usuario();
+        uCeleste.setNome("Celeste"); uCeleste.setEmail("celeste@reservas.mz");
+        uCeleste.setSenha(encoder.encode("senha12345")); uCeleste.setRole(Usuario.Role.PROPRIETARIO);
+        usuarioRepo.save(uCeleste);
+
+        // ── CLIENTES ligados aos seus Usuarios ───────────────────────────────
         Cliente c1 = new Cliente();
         c1.setNome("Armindo"); c1.setApelido("Muchanga");
         c1.setTelefone("+258 84 312 4567"); c1.setBairro("Polana Cimento");
         c1.setTipoDocumento("BI"); c1.setNumeroDocumento("1234567890MZ");
+        c1.setUsuario(uArmindo);
         clienteRepo.save(c1);
 
         Cliente c2 = new Cliente();
-        c2.setNome("Esperança"); c2.setApelido("Guambe");
+        c2.setNome("Esperanca"); c2.setApelido("Guambe");
         c2.setTelefone("+258 82 456 7890"); c2.setBairro("Sommerschield");
         c2.setTipoDocumento("BI"); c2.setNumeroDocumento("0987654321MZ");
+        c2.setUsuario(uEsperanca);
         clienteRepo.save(c2);
 
         Cliente c3 = new Cliente();
-        c3.setNome("Hélder"); c3.setApelido("Sithole");
+        c3.setNome("Helder"); c3.setApelido("Sithole");
         c3.setTelefone("+258 86 789 0123"); c3.setBairro("Malhangalene");
         c3.setTipoDocumento("Passaporte"); c3.setNumeroDocumento("MZ0023456A");
+        c3.setUsuario(uHelder);
         clienteRepo.save(c3);
 
         Cliente c4 = new Cliente();
         c4.setNome("Lurdes"); c4.setApelido("Nhaca");
         c4.setTelefone("+258 84 234 5678"); c4.setBairro("Maxaquene");
         c4.setTipoDocumento("BI"); c4.setNumeroDocumento("1122334455MZ");
+        c4.setUsuario(uLurdes);
         clienteRepo.save(c4);
 
         Cliente c5 = new Cliente();
         c5.setNome("Osvaldo"); c5.setApelido("Cossa");
         c5.setTelefone("+258 82 345 6789"); c5.setBairro("Julius Nyerere");
         c5.setTipoDocumento("BI"); c5.setNumeroDocumento("6677889900MZ");
+        c5.setUsuario(uOsvaldo);
         clienteRepo.save(c5);
 
-        // ================================================================
-        // PROPRIETÁRIOS
-        // ================================================================
+        // ── PROPRIETARIOS ligados aos seus Usuarios ───────────────────────────
         Proprietario p1 = new Proprietario();
         p1.setNome("Joaquim"); p1.setApelido("Nhamithambo");
         p1.setTelefone("+258 84 678 9012"); p1.setBairro("Polana Cimento");
         p1.setNuit("400112233");
+        p1.setUsuario(uJoaquim);
         proprietarioRepo.save(p1);
 
         Proprietario p2 = new Proprietario();
         p2.setNome("Celeste"); p2.setApelido("Tivane");
         p2.setTelefone("+258 82 789 0124"); p2.setBairro("Julius Nyerere");
         p2.setNuit("400998877");
+        p2.setUsuario(uCeleste);
         proprietarioRepo.save(p2);
 
-        // ================================================================
-        // ESPAÇOS - locais reais de eventos em Maputo
-        // ================================================================
+        // ── ESPAÇOS ───────────────────────────────────────────────────────────
         Espaco e1 = new Espaco();
         e1.setProprietario(p1);
-        e1.setNomeEspaco("Salão Polana Gold");
-        e1.setDescricao("Salão elegante em Polana Cimento com capacidade para 300 pessoas, ar condicionado central, sistema de som profissional e catering disponível.");
+        e1.setNomeEspaco("Salao Polana Gold");
+        e1.setDescricao("Salao elegante em Polana Cimento com capacidade para 300 pessoas, ar condicionado central, sistema de som profissional e catering disponivel.");
         e1.setBairro("Polana Cimento"); e1.setCapacidade(300);
         e1.setPrecoReserva(new BigDecimal("50000.00"));
         e1.setTipoEvento("Casamento"); e1.setDisponibilidade(true);
@@ -108,17 +134,17 @@ public class DataLoader implements CommandLineRunner {
 
         Espaco e2 = new Espaco();
         e2.setProprietario(p1);
-        e2.setNomeEspaco("Centro de Conferências Sommerschield");
-        e2.setDescricao("Sala de conferências moderna com projector HD, wi-fi de alta velocidade, ar condicionado e capacidade para 150 pessoas.");
+        e2.setNomeEspaco("Centro de Conferencias Sommerschield");
+        e2.setDescricao("Sala de conferencias moderna com projector HD, wi-fi de alta velocidade, ar condicionado e capacidade para 150 pessoas.");
         e2.setBairro("Sommerschield"); e2.setCapacidade(150);
         e2.setPrecoReserva(new BigDecimal("30000.00"));
-        e2.setTipoEvento("Conferência"); e2.setDisponibilidade(true);
+        e2.setTipoEvento("Conferencia"); e2.setDisponibilidade(true);
         espacoRepo.save(e2);
 
         Espaco e3 = new Espaco();
         e3.setProprietario(p2);
         e3.setNomeEspaco("Jardim dos Eventos Malhangalene");
-        e3.setDescricao("Espaço ao ar livre com jardim tropical e iluminação ambiente, ideal para festas e eventos sociais até 500 pessoas.");
+        e3.setDescricao("Espaco ao ar livre com jardim tropical e iluminacao ambiente, ideal para festas e eventos sociais ate 500 pessoas.");
         e3.setBairro("Malhangalene"); e3.setCapacidade(500);
         e3.setPrecoReserva(new BigDecimal("75000.00"));
         e3.setTipoEvento("Festa"); e3.setDisponibilidade(true);
@@ -126,103 +152,85 @@ public class DataLoader implements CommandLineRunner {
 
         Espaco e4 = new Espaco();
         e4.setProprietario(p2);
-        e4.setNomeEspaco("Auditório Julius Nyerere");
-        e4.setDescricao("Auditório com palco profissional, iluminação cénica, sistema de som surround e capacidade para 400 pessoas.");
+        e4.setNomeEspaco("Auditorio Julius Nyerere");
+        e4.setDescricao("Auditorio com palco profissional, iluminacao cenica, sistema de som surround e capacidade para 400 pessoas.");
         e4.setBairro("Julius Nyerere"); e4.setCapacidade(400);
         e4.setPrecoReserva(new BigDecimal("60000.00"));
-        e4.setTipoEvento("Conferência"); e4.setDisponibilidade(false);
+        e4.setTipoEvento("Conferencia"); e4.setDisponibilidade(false);
         espacoRepo.save(e4);
 
         Espaco e5 = new Espaco();
         e5.setProprietario(p1);
         e5.setNomeEspaco("Sala VIP Executive Polana");
-        e5.setDescricao("Sala executiva climatizada para reuniões e eventos corporativos de pequena dimensão, com equipamento audiovisual completo.");
+        e5.setDescricao("Sala executiva climatizada para reunioes e eventos corporativos de pequena dimensao, com equipamento audiovisual completo.");
         e5.setBairro("Polana Cimento"); e5.setCapacidade(50);
         e5.setPrecoReserva(new BigDecimal("15000.00"));
-        e5.setTipoEvento("Reunião"); e5.setDisponibilidade(true);
+        e5.setTipoEvento("Reuniao"); e5.setDisponibilidade(true);
         espacoRepo.save(e5);
 
-        // ================================================================
-        // RESERVAS
-        // ================================================================
+        // ── RESERVAS ──────────────────────────────────────────────────────────
         Reserva r1 = new Reserva();
         r1.setCliente(c1); r1.setEspaco(e1);
         r1.setDataEvento(LocalDate.now().plusDays(10));
-        r1.setHoraInicio(LocalTime.of(14, 0));
-        r1.setHoraFim(LocalTime.of(23, 0));
-        r1.setNumeroParticipantes(250);
-        r1.setValorTotal(new BigDecimal("450000.00"));
+        r1.setHoraInicio(LocalTime.of(14, 0)); r1.setHoraFim(LocalTime.of(23, 0));
+        r1.setNumeroParticipantes(250); r1.setValorTotal(new BigDecimal("450000.00"));
         r1.setEstado(Reserva.Estado.CONFIRMADA);
         reservaRepo.save(r1);
 
         Reserva r2 = new Reserva();
         r2.setCliente(c2); r2.setEspaco(e2);
         r2.setDataEvento(LocalDate.now().plusDays(5));
-        r2.setHoraInicio(LocalTime.of(9, 0));
-        r2.setHoraFim(LocalTime.of(17, 0));
-        r2.setNumeroParticipantes(100);
-        r2.setValorTotal(new BigDecimal("240000.00"));
+        r2.setHoraInicio(LocalTime.of(9, 0)); r2.setHoraFim(LocalTime.of(17, 0));
+        r2.setNumeroParticipantes(100); r2.setValorTotal(new BigDecimal("240000.00"));
         r2.setEstado(Reserva.Estado.PENDENTE);
         reservaRepo.save(r2);
 
         Reserva r3 = new Reserva();
         r3.setCliente(c3); r3.setEspaco(e3);
         r3.setDataEvento(LocalDate.now().plusDays(20));
-        r3.setHoraInicio(LocalTime.of(18, 0));
-        r3.setHoraFim(LocalTime.of(23, 0));
-        r3.setNumeroParticipantes(400);
-        r3.setValorTotal(new BigDecimal("375000.00"));
+        r3.setHoraInicio(LocalTime.of(18, 0)); r3.setHoraFim(LocalTime.of(23, 0));
+        r3.setNumeroParticipantes(400); r3.setValorTotal(new BigDecimal("375000.00"));
         r3.setEstado(Reserva.Estado.PENDENTE);
         reservaRepo.save(r3);
 
         Reserva r4 = new Reserva();
         r4.setCliente(c4); r4.setEspaco(e5);
         r4.setDataEvento(LocalDate.now().plusDays(3));
-        r4.setHoraInicio(LocalTime.of(10, 0));
-        r4.setHoraFim(LocalTime.of(13, 0));
-        r4.setNumeroParticipantes(30);
-        r4.setValorTotal(new BigDecimal("45000.00"));
+        r4.setHoraInicio(LocalTime.of(10, 0)); r4.setHoraFim(LocalTime.of(13, 0));
+        r4.setNumeroParticipantes(30); r4.setValorTotal(new BigDecimal("45000.00"));
         r4.setEstado(Reserva.Estado.CONFIRMADA);
         reservaRepo.save(r4);
 
         Reserva r5 = new Reserva();
         r5.setCliente(c5); r5.setEspaco(e1);
         r5.setDataEvento(LocalDate.now().plusDays(15));
-        r5.setHoraInicio(LocalTime.of(15, 0));
-        r5.setHoraFim(LocalTime.of(22, 0));
-        r5.setNumeroParticipantes(200);
-        r5.setValorTotal(new BigDecimal("350000.00"));
+        r5.setHoraInicio(LocalTime.of(15, 0)); r5.setHoraFim(LocalTime.of(22, 0));
+        r5.setNumeroParticipantes(200); r5.setValorTotal(new BigDecimal("350000.00"));
         r5.setEstado(Reserva.Estado.CANCELADA);
         reservaRepo.save(r5);
 
-        // ================================================================
-        // PAGAMENTOS
-        // ================================================================
+        // ── PAGAMENTOS ────────────────────────────────────────────────────────
         Pagamento pg1 = new Pagamento();
-        pg1.setReserva(r1);
-        pg1.setValorPago(new BigDecimal("450000.00"));
-        pg1.setDataPagamento(LocalDate.now().minusDays(2));
-        pg1.setMetodoPagamento("M-Pesa");
+        pg1.setReserva(r1); pg1.setValorPago(new BigDecimal("450000.00"));
+        pg1.setDataPagamento(LocalDate.now().minusDays(2)); pg1.setMetodoPagamento("M-Pesa");
         pagamentoRepo.save(pg1);
 
         Pagamento pg2 = new Pagamento();
-        pg2.setReserva(r2);
-        pg2.setValorPago(new BigDecimal("120000.00")); // Entrada parcial
-        pg2.setDataPagamento(LocalDate.now().minusDays(1));
-        pg2.setMetodoPagamento("Transferência Bancária");
+        pg2.setReserva(r2); pg2.setValorPago(new BigDecimal("120000.00"));
+        pg2.setDataPagamento(LocalDate.now().minusDays(1)); pg2.setMetodoPagamento("Transferencia Bancaria");
         pagamentoRepo.save(pg2);
 
         Pagamento pg3 = new Pagamento();
-        pg3.setReserva(r4);
-        pg3.setValorPago(new BigDecimal("45000.00"));
-        pg3.setDataPagamento(LocalDate.now());
-        pg3.setMetodoPagamento("e-Mola");
+        pg3.setReserva(r4); pg3.setValorPago(new BigDecimal("45000.00"));
+        pg3.setDataPagamento(LocalDate.now()); pg3.setMetodoPagamento("e-Mola");
         pagamentoRepo.save(pg3);
 
-        System.out.println("============================================================");
-        System.out.println("  Dados iniciais carregados com sucesso!");
-        System.out.println("  ADMIN: admin@reservas.mz / ALTERE_ESTA_SENHA");
-        System.out.println("  IMPORTANTE: Altere a senha imediatamente após o login!");
-        System.out.println("============================================================");
+        System.out.println("========================================");
+        System.out.println("  Dados iniciais carregados com sucesso");
+        System.out.println("  ADMIN:       admin@reservas.mz       / engsoft2026!");
+        System.out.println("  PROPRIETARIO: joaquim@reservas.mz    / senha12345");
+        System.out.println("  PROPRIETARIO: celeste@reservas.mz    / senha12345");
+        System.out.println("  CLIENTE:     armindo@reservas.mz     / senha12345");
+        System.out.println("========================================");
     }
 }

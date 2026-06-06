@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Clientes — ReservaEspaços Maputo</title>
+<title>Clientes - ReservaEspaços Maputo</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
@@ -36,7 +36,7 @@
   </nav>
   <div class="sidebar-footer">
     <div class="user-info"><div class="avatar" id="sidebar-avatar">?</div>
-      <div><div class="user-name" id="sidebar-name">—</div><div class="user-role" id="sidebar-role">—</div></div>
+      <div><div class="user-name" id="sidebar-name">-</div><div class="user-role" id="sidebar-role">-</div></div>
     </div>
     <button class="btn-logout" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i></button>
   </div>
@@ -124,6 +124,20 @@ checkAuth(); initUI();
 let data = [];
 
 async function load() {
+  // CORRIGIDO: PROPRIETARIO não tem acesso a GET /cliente (403).
+  // Verificar o role antes da chamada e mostrar mensagem clara.
+  const role = getCurrentRole();
+  if (role !== 'ADMIN') {
+    document.getElementById('tbody').innerHTML =
+      '<tr><td colspan="7" class="empty-cell">' +
+      '<i class="fa-solid fa-lock"></i> ' +
+      'Apenas administradores podem visualizar a lista de clientes.' +
+      '</td></tr>';
+    // Oculta o botão "Novo Cliente" para PROPRIETARIO
+    const btnNovo = document.querySelector('.btn-primary[onclick="openModal()"]');
+    if (btnNovo) btnNovo.style.display = 'none';
+    return;
+  }
   try {
     data = await API.get('/cliente');
     render(data);

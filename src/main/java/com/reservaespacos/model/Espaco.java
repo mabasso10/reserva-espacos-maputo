@@ -3,13 +3,9 @@ package com.reservaespacos.model;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
-/**
- * Entidade Espaco.
- * Campos conforme especificacao:
- *   id, proprietario_id, nome_espaco, descricao, bairro, capacidade,
- *   preco_reserva, tipo_evento, foto, disponibilidade
- */
 @Entity
 @Table(name = "espacos")
 public class Espaco {
@@ -51,9 +47,14 @@ public class Espaco {
     @Column(name = "tipo_evento", nullable = false, length = 100)
     private String tipoEvento;
 
-    @Size(max = 300)
-    @Column(length = 300)
-    private String foto;
+    /**
+     * Lista de nomes de ficheiros de fotos (máx. 7).
+     * Guardada como TEXT JSON na coluna "fotos".
+     * Compatível com H2 e PostgreSQL sem extensões adicionais.
+     */
+    @Convert(converter = StringListConverter.class)
+    @Column(name = "fotos", length = 2000)
+    private List<String> fotos = new ArrayList<>();
 
     @Column(nullable = false)
     private Boolean disponibilidade = true;
@@ -76,8 +77,14 @@ public class Espaco {
     public void setPrecoReserva(BigDecimal precoReserva) { this.precoReserva = precoReserva; }
     public String getTipoEvento() { return tipoEvento; }
     public void setTipoEvento(String tipoEvento) { this.tipoEvento = tipoEvento; }
-    public String getFoto() { return foto; }
-    public void setFoto(String foto) { this.foto = foto; }
+    public List<String> getFotos() { return fotos; }
+    public void setFotos(List<String> fotos) { this.fotos = fotos != null ? fotos : new ArrayList<>(); }
+
+    /** Retrocompatibilidade: devolve a primeira foto ou null */
+    public String getFoto() {
+        return (fotos != null && !fotos.isEmpty()) ? fotos.get(0) : null;
+    }
+
     public Boolean getDisponibilidade() { return disponibilidade; }
     public void setDisponibilidade(Boolean disponibilidade) { this.disponibilidade = disponibilidade; }
 }

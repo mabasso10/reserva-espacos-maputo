@@ -6,9 +6,9 @@ import java.math.BigDecimal;
 
 public class Dtos {
 
-    // ============================================================
-    //  Auth — Login
-    // ============================================================
+    
+    
+    
 
     @Schema(description = "Dados necessários para autenticação (POST /auth/login)")
     public static class LoginRequest {
@@ -24,7 +24,7 @@ public class Dtos {
 
         @Schema(
             description = "Senha da conta",
-            example = "ALTERE_ESTA_SENHA",
+            example = "engsoft2026!",
             requiredMode = Schema.RequiredMode.REQUIRED
         )
         @NotBlank(message = "Senha e obrigatoria")
@@ -40,7 +40,7 @@ public class Dtos {
     public static class LoginResponse {
 
         @Schema(
-            description = "Token JWT — use no header Authorization: Bearer <token>",
+            description = "Token JWT - use no header Authorization: Bearer <token>",
             example = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkByZXNlcnZhcy5teiIsImlhdCI6MTcxNzAwMDAwMH0.abc123"
         )
         public String token;
@@ -57,14 +57,20 @@ public class Dtos {
         @Schema(description = "Perfil do utilizador: ADMIN | PROPRIETARIO | CLIENTE", example = "ADMIN")
         public String role;
 
+        @Schema(description = "ID do registo de Cliente associado (apenas para role CLIENTE)", example = "3")
+        public Long clienteId;
+
+        @Schema(description = "ID do registo de Proprietario associado (apenas para role PROPRIETARIO)", example = "2")
+        public Long proprietarioId;
+
         public LoginResponse(String token, String email, String nome, String role) {
             this.token = token; this.email = email; this.nome = nome; this.role = role;
         }
     }
 
-    // ============================================================
-    //  Auth — Registo (público e admin)
-    // ============================================================
+    
+    
+    
 
     @Schema(description = "Dados para criação de nova conta de utilizador")
     public static class RegistoRequest {
@@ -121,14 +127,14 @@ public class Dtos {
         }
     }
 
-    // ============================================================
-    //  Auth — Alterar senha
-    // ============================================================
+    
+    
+    
 
     @Schema(description = "Dados para alterar a senha do utilizador autenticado")
     public static class AlterarSenhaRequest {
 
-        @Schema(description = "Senha actual do utilizador", example = "ALTERE_ESTA_SENHA", requiredMode = Schema.RequiredMode.REQUIRED)
+        @Schema(description = "Senha actual do utilizador", example = "engsoft2026!", requiredMode = Schema.RequiredMode.REQUIRED)
         @NotBlank(message = "Senha actual e obrigatoria")
         private String senhaActual;
 
@@ -143,9 +149,9 @@ public class Dtos {
         public void setNovaSenha(String s) { this.novaSenha = s; }
     }
 
-    // ============================================================
-    //  Pagamento — registar (POST /pagamento)
-    // ============================================================
+    
+    
+    
 
     @Schema(description = "Dados para registar um pagamento de reserva")
     public static class PagamentoRequest {
@@ -176,9 +182,9 @@ public class Dtos {
         public void setMetodoPagamento(String v) { this.metodoPagamento = v; }
     }
 
-    // ============================================================
-    //  Reserva — registar (POST /reserva)
-    // ============================================================
+    
+    
+    
 
     @Schema(description = "Dados para registar uma nova reserva")
     public static class ReservaRequest {
@@ -210,9 +216,9 @@ public class Dtos {
         public void setNumeroParticipantes(Integer v) { this.numeroParticipantes = v; }
     }
 
-    // ============================================================
-    //  Reserva — actualizar estado
-    // ============================================================
+    
+    
+    
 
     @Schema(description = "Dados para actualizar o estado de uma reserva")
     public static class AtualizarEstadoReservaRequest {
@@ -230,9 +236,9 @@ public class Dtos {
         public void setEstado(String estado) { this.estado = estado; }
     }
 
-    // ============================================================
-    //  Espaco — criar / actualizar
-    // ============================================================
+    
+    
+    
 
     @Schema(description = "Dados para registar ou actualizar um espaço")
     public static class EspacoRequest {

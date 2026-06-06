@@ -1,5 +1,5 @@
 /* ============================================================
-   ReservaEspaços Maputo — CSS Responsivo Completo
+   ReservaEspaços Maputo - CSS Responsivo Completo
    ============================================================ */
 
 :root {
@@ -815,7 +815,7 @@ body {
 .spinner { margin-left: 4px; }
 
 /* ============================================================
-   RESPONSIVE — TABLET
+   RESPONSIVE - TABLET
    ============================================================ */
 @media (max-width: 900px) {
   .sidebar {
@@ -832,7 +832,7 @@ body {
 }
 
 /* ============================================================
-   RESPONSIVE — MOBILE
+   RESPONSIVE - MOBILE
    ============================================================ */
 @media (max-width: 600px) {
   .page-content { padding: 0.75rem; }

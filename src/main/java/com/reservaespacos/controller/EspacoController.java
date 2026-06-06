@@ -33,148 +33,90 @@ public class EspacoController {
     @Value("${app.uploads.dir:./uploads}")
     private String uploadsDir;
 
-    // ----------------------------------------------------------------
-    // GET – consultas (ADMIN + PROPRIETARIO + CLIENTE)
-    // ----------------------------------------------------------------
+    // ── GET ───────────────────────────────────────────────────────────────────
 
-    @Operation(
-        summary = "Listar todos os espacos",
-        description = "Acessivel por ADMIN, PROPRIETARIO e CLIENTE.",
-        security = @SecurityRequirement(name = "bearerAuth")
-    )
+    @Operation(summary = "Listar todos os espacos", security = @SecurityRequirement(name = "bearerAuth"))
     @PreAuthorize("hasAnyRole('ADMIN','PROPRIETARIO','CLIENTE')")
     @GetMapping
     public ResponseEntity<List<Espaco>> listarTodos() {
         return ResponseEntity.ok(espacoService.listarTodos());
     }
 
-    @Operation(
-        summary = "Listar espacos publicamente (sem autenticacao)",
-        description = "Endpoint publico — nao requer token."
-    )
+    @Operation(summary = "Listar espacos publicamente (sem autenticacao)")
     @GetMapping("/publico")
     public ResponseEntity<List<Espaco>> listarPublico() {
         return ResponseEntity.ok(espacoService.listarTodos());
     }
 
-    @Operation(
-        summary = "Consultar espaco por ID",
-        description = "Acessivel por ADMIN, PROPRIETARIO e CLIENTE.",
-        security = @SecurityRequirement(name = "bearerAuth")
-    )
-    @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Espaco encontrado"),
-        @ApiResponse(responseCode = "404", description = "Espaco nao encontrado")
-    })
+    @Operation(summary = "Consultar espaco por ID", security = @SecurityRequirement(name = "bearerAuth"))
     @PreAuthorize("hasAnyRole('ADMIN','PROPRIETARIO','CLIENTE')")
     @GetMapping("/{id}")
-    public ResponseEntity<Espaco> buscarPorId(
-            @Parameter(description = "ID do espaco") @PathVariable Long id) {
+    public ResponseEntity<Espaco> buscarPorId(@PathVariable Long id) {
         return ResponseEntity.ok(espacoService.buscarPorId(id));
     }
 
-    @Operation(
-        summary = "Consultar espacos por proprietario",
-        description = "Acessivel por ADMIN, PROPRIETARIO e CLIENTE.",
-        security = @SecurityRequirement(name = "bearerAuth")
-    )
+    @Operation(summary = "Consultar espacos por proprietario", security = @SecurityRequirement(name = "bearerAuth"))
     @PreAuthorize("hasAnyRole('ADMIN','PROPRIETARIO','CLIENTE')")
     @GetMapping("/proprietario/{proprietarioId}")
-    public ResponseEntity<List<Espaco>> porProprietario(
-            @Parameter(description = "ID do proprietario") @PathVariable Long proprietarioId) {
+    public ResponseEntity<List<Espaco>> porProprietario(@PathVariable Long proprietarioId) {
         return ResponseEntity.ok(espacoService.buscarPorProprietario(proprietarioId));
     }
 
-    @Operation(
-        summary = "Consultar espacos por tipo de evento",
-        description = "Pesquisa parcial, case-insensitive. Acessivel por ADMIN, PROPRIETARIO e CLIENTE.",
-        security = @SecurityRequirement(name = "bearerAuth")
-    )
+    @Operation(summary = "Consultar espacos por tipo de evento", security = @SecurityRequirement(name = "bearerAuth"))
     @PreAuthorize("hasAnyRole('ADMIN','PROPRIETARIO','CLIENTE')")
     @GetMapping("/tipo/{tipoEvento}")
-    public ResponseEntity<List<Espaco>> porTipoEvento(
-            @Parameter(description = "Tipo de evento", example = "Casamento")
-            @PathVariable String tipoEvento) {
+    public ResponseEntity<List<Espaco>> porTipoEvento(@PathVariable String tipoEvento) {
         return ResponseEntity.ok(espacoService.buscarPorTipoEvento(tipoEvento));
     }
 
-    // ----------------------------------------------------------------
-    // POST – registar (ADMIN + PROPRIETARIO)
-    // ----------------------------------------------------------------
+    // ── POST ──────────────────────────────────────────────────────────────────
 
-    @Operation(
-        summary = "Registar um novo espaco",
-        description = "Apenas ADMIN e PROPRIETARIO podem criar espacos.",
-        security = @SecurityRequirement(name = "bearerAuth")
-    )
-    @ApiResponses({
-        @ApiResponse(responseCode = "201", description = "Espaco criado com sucesso"),
-        @ApiResponse(responseCode = "400", description = "Dados invalidos"),
-        @ApiResponse(responseCode = "403", description = "Sem permissao — requer ADMIN ou PROPRIETARIO"),
-        @ApiResponse(responseCode = "404", description = "Proprietario nao encontrado")
-    })
+    @Operation(summary = "Registar um novo espaco", security = @SecurityRequirement(name = "bearerAuth"))
     @PreAuthorize("hasAnyRole('ADMIN','PROPRIETARIO')")
     @PostMapping
     public ResponseEntity<Espaco> registar(@Valid @RequestBody Dtos.EspacoRequest dto) {
         return ResponseEntity.status(201).body(espacoService.registar(dto));
     }
 
-    // ----------------------------------------------------------------
-    // PUT – actualizar (ADMIN + PROPRIETARIO)
-    // ----------------------------------------------------------------
+    // ── PUT ───────────────────────────────────────────────────────────────────
 
-    @Operation(
-        summary = "Actualizar dados de um espaco",
-        description = "Apenas ADMIN e PROPRIETARIO podem editar espacos.",
-        security = @SecurityRequirement(name = "bearerAuth")
-    )
-    @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Espaco actualizado"),
-        @ApiResponse(responseCode = "403", description = "Sem permissao — requer ADMIN ou PROPRIETARIO"),
-        @ApiResponse(responseCode = "404", description = "Espaco ou proprietario nao encontrado")
-    })
+    @Operation(summary = "Actualizar dados de um espaco", security = @SecurityRequirement(name = "bearerAuth"))
     @PreAuthorize("hasAnyRole('ADMIN','PROPRIETARIO')")
     @PutMapping("/{id}")
-    public ResponseEntity<Espaco> actualizar(
-            @Parameter(description = "ID do espaco") @PathVariable Long id,
-            @Valid @RequestBody Dtos.EspacoRequest dto) {
+    public ResponseEntity<Espaco> actualizar(@PathVariable Long id,
+                                              @Valid @RequestBody Dtos.EspacoRequest dto) {
         return ResponseEntity.ok(espacoService.actualizar(id, dto));
     }
 
-    // ----------------------------------------------------------------
-    // DELETE – remover (ADMIN + PROPRIETARIO)
-    // ----------------------------------------------------------------
+    // ── DELETE ────────────────────────────────────────────────────────────────
 
-    @Operation(
-        summary = "Remover um espaco",
-        description = "Apenas ADMIN e PROPRIETARIO podem remover espacos.",
-        security = @SecurityRequirement(name = "bearerAuth")
-    )
-    @ApiResponses({
-        @ApiResponse(responseCode = "204", description = "Espaco removido com sucesso"),
-        @ApiResponse(responseCode = "403", description = "Sem permissao — requer ADMIN ou PROPRIETARIO"),
-        @ApiResponse(responseCode = "404", description = "Espaco nao encontrado")
-    })
+    @Operation(summary = "Remover um espaco", security = @SecurityRequirement(name = "bearerAuth"))
     @PreAuthorize("hasAnyRole('ADMIN','PROPRIETARIO')")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> remover(
-            @Parameter(description = "ID do espaco") @PathVariable Long id) {
+    public ResponseEntity<Void> remover(@PathVariable Long id) {
         espacoService.remover(id);
         return ResponseEntity.noContent().build();
     }
 
-    // ----------------------------------------------------------------
-    // POST /{id}/foto – upload de imagem (ADMIN + PROPRIETARIO)
-    // ----------------------------------------------------------------
+    // ── FOTOS ─────────────────────────────────────────────────────────────────
 
+    /**
+     * CORRIGIDO: cada chamada ACUMULA a foto na lista (máx. 7).
+     * Anteriormente sobrescrevia — agora chama adicionarFoto().
+     */
     @Operation(
-        summary = "Upload de foto do espaco",
-        description = "Apenas ADMIN e PROPRIETARIO podem fazer upload de fotos.",
+        summary = "Adicionar foto ao espaco (max 7)",
+        description = "Cada chamada acumula uma foto. Chame este endpoint em loop para múltiplas fotos.",
         security = @SecurityRequirement(name = "bearerAuth")
     )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Foto adicionada com sucesso"),
+        @ApiResponse(responseCode = "400", description = "Limite de 7 fotos atingido ou ficheiro inválido"),
+        @ApiResponse(responseCode = "413", description = "Ficheiro demasiado grande (max 10 MB)")
+    })
     @PreAuthorize("hasAnyRole('ADMIN','PROPRIETARIO')")
     @PostMapping("/{id}/foto")
-    public ResponseEntity<Espaco> uploadFoto(
+    public ResponseEntity<Espaco> adicionarFoto(
             @Parameter(description = "ID do espaco") @PathVariable Long id,
             @RequestParam("arquivo") MultipartFile arquivo) throws IOException {
 
@@ -190,6 +132,32 @@ public class EspacoController {
         Path destino = dir.resolve(nomeFicheiro);
         Files.copy(arquivo.getInputStream(), destino, StandardCopyOption.REPLACE_EXISTING);
 
-        return ResponseEntity.ok(espacoService.actualizarFoto(id, nomeFicheiro));
+        // CORRIGIDO: acumula em vez de sobrescrever
+        return ResponseEntity.ok(espacoService.adicionarFoto(id, nomeFicheiro));
+    }
+
+    /**
+     * Remove uma foto específica da lista do espaço pelo nome do ficheiro.
+     */
+    @Operation(
+        summary = "Remover foto do espaco",
+        description = "Remove uma foto da lista pelo nome do ficheiro.",
+        security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @PreAuthorize("hasAnyRole('ADMIN','PROPRIETARIO')")
+    @DeleteMapping("/{id}/foto/{nomeFicheiro}")
+    public ResponseEntity<Espaco> removerFoto(
+            @PathVariable Long id,
+            @PathVariable String nomeFicheiro) throws IOException {
+
+        Espaco espaco = espacoService.removerFoto(id, nomeFicheiro);
+
+        // Apaga o ficheiro físico do disco (best-effort)
+        try {
+            Path ficheiro = Paths.get(uploadsDir).resolve(nomeFicheiro);
+            Files.deleteIfExists(ficheiro);
+        } catch (IOException ignored) {}
+
+        return ResponseEntity.ok(espaco);
     }
 }

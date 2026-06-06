@@ -21,7 +21,6 @@ public class AuthService {
     @Autowired private UsuarioRepository usuarioRepository;
     @Autowired private PasswordEncoder passwordEncoder;
 
-    /** Login — devolve token JWT */
     public String login(String email, String senha) {
         Authentication authentication = authenticationManager.authenticate(
             new UsernamePasswordAuthenticationToken(email, senha)
@@ -29,15 +28,10 @@ public class AuthService {
         return jwtUtils.generateToken(authentication);
     }
 
-    /**
-     * Registo público e registo por ADMIN.
-     * Ambos os endpoints (/auth/register e /auth/admin/register) chamam este método.
-     * O controller /auth/register garante que role != ADMIN antes de chamar.
-     */
     public Usuario registarPublico(Dtos.RegistoRequest request) {
         if (usuarioRepository.existsByEmail(request.getEmail())) {
             throw new RegraDeNegocioException(
-                "Já existe uma conta com o email: " + request.getEmail()
+                "Ja existe uma conta com o email: " + request.getEmail()
             );
         }
 
@@ -57,13 +51,12 @@ public class AuthService {
         return usuarioRepository.save(usuario);
     }
 
-    /** Alterar senha do utilizador autenticado */
     public void alterarSenha(String email, String senhaActual, String novaSenha) {
         authenticationManager.authenticate(
             new UsernamePasswordAuthenticationToken(email, senhaActual)
         );
         Usuario usuario = usuarioRepository.findByEmail(email)
-            .orElseThrow(() -> new RegraDeNegocioException("Utilizador não encontrado."));
+            .orElseThrow(() -> new RegraDeNegocioException("Utilizador nao encontrado."));
         usuario.setSenha(passwordEncoder.encode(novaSenha));
         usuarioRepository.save(usuario);
     }

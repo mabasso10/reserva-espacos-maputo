@@ -6,13 +6,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-/**
- * Entidade Reserva.
- * Campos conforme especificacao:
- *   id, cliente_id, data_evento, espaco_id, hora_inicio, hora_fim,
- *   numero_participantes, valor_total, estado
- * Estados: PENDENTE, CONFIRMADA, CANCELADA, CONCLUIDA
- */
 @Entity
 @Table(name = "reservas")
 public class Reserva {

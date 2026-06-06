@@ -1,5 +1,5 @@
 // ============================================================
-//  api.js — Utilitário de chamadas à REST API
+//  api.js - Utilitário de chamadas à REST API
 // ============================================================
 
 const API_BASE = '';  // Mesmo host (Spring serve tudo na porta 8080)
@@ -75,6 +75,20 @@ const API = {
             headers: this._headers()
         });
         if (res.status === 204) return null;
+        return this._handle(res);
+    },
+
+    // Enviar FormData (multipart/form-data) — sem Content-Type manual,
+    // o browser define a boundary automaticamente
+    async upload(path, formData) {
+        const token = localStorage.getItem('token');
+        const headers = {};
+        if (token) headers['Authorization'] = 'Bearer ' + token;
+        const res = await fetch(API_BASE + path, {
+            method: 'POST',
+            headers,
+            body: formData
+        });
         return this._handle(res);
     }
 };

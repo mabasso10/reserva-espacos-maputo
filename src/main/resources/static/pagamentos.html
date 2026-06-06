@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Pagamentos — ReservaEspaços Maputo</title>
+<title>Pagamentos - ReservaEspaços Maputo</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
@@ -100,7 +100,7 @@
   </nav>
   <div class="sidebar-footer">
     <div class="user-info"><div class="avatar" id="sidebar-avatar">?</div>
-      <div><div class="user-name" id="sidebar-name">—</div><div class="user-role" id="sidebar-role">—</div></div>
+      <div><div class="user-name" id="sidebar-name">-</div><div class="user-role" id="sidebar-role">-</div></div>
     </div>
     <button class="btn-logout" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i></button>
   </div>
@@ -116,7 +116,7 @@
   <main class="page-content">
 
     <!-- ══════════════════════════════════════════
-         BARRA DE CONSULTAS — Capítulo 11
+         BARRA DE CONSULTAS - Capítulo 11
          POST /pagamento          → modal abaixo
          GET  /pagamento/{id}     → por ID
          GET  /pagamento/data/{d} → por data
@@ -172,15 +172,15 @@
     <div class="stats-mini">
       <div class="stat-mini">
         <span class="sm-label"><i class="fa-solid fa-coins"></i> Total recebido</span>
-        <span class="sm-val" id="sm-total">—</span>
+        <span class="sm-val" id="sm-total">-</span>
       </div>
       <div class="stat-mini">
         <span class="sm-label"><i class="fa-solid fa-receipt"></i> Nº de pagamentos</span>
-        <span class="sm-val" id="sm-count">—</span>
+        <span class="sm-val" id="sm-count">-</span>
       </div>
       <div class="stat-mini">
         <span class="sm-label"><i class="fa-solid fa-chart-simple"></i> Média por pagamento</span>
-        <span class="sm-val" id="sm-avg">—</span>
+        <span class="sm-val" id="sm-avg">-</span>
       </div>
     </div>
 
@@ -210,7 +210,7 @@
 </div>
 
 <!-- ══════════════════════════════════════════
-     Modal — Registar Pagamento (POST /pagamento)
+     Modal - Registar Pagamento (POST /pagamento)
 ══════════════════════════════════════════ -->
 <div class="modal-backdrop" id="modal" onclick="closeOnBackdrop(event)">
   <div class="modal">
@@ -224,7 +224,7 @@
       <div class="form-group">
         <label>Reserva *</label>
         <select id="f-reservaId" onchange="onReservaChange()">
-          <option value="">— Selecione uma Reserva —</option>
+          <option value="">- Selecione uma Reserva -</option>
         </select>
       </div>
 
@@ -292,10 +292,10 @@ async function load() {
 
     // Preenche select do modal com reservas não canceladas
     const sel = document.getElementById('f-reservaId');
-    sel.innerHTML = '<option value="">— Selecione uma Reserva —</option>' +
+    sel.innerHTML = '<option value="">- Selecione uma Reserva -</option>' +
       reservas
         .filter(r => r.estado !== 'CANCELADA')
-        .map(r => `<option value="${r.id}">#${r.id} — ${r.espaco?.nomeEspaco || 'Espaço'} · ${r.estado} · ${formatMZN(r.valorTotal)}</option>`)
+        .map(r => `<option value="${r.id}">#${r.id} - ${r.espaco?.nomeEspaco || 'Espaço'} · ${r.estado} · ${formatMZN(r.valorTotal)}</option>`)
         .join('');
 
     viewData = allData;
@@ -316,7 +316,7 @@ function render(rows) {
   tbody.innerHTML = rows.map(p => `
     <tr>
       <td><span class="mono">#${p.id}</span></td>
-      <td><span class="mono">#${p.reserva?.id}</span> — ${p.reserva?.espaco?.nomeEspaco || 'N/A'}</td>
+      <td><span class="mono">#${p.reserva?.id}</span> - ${p.reserva?.espaco?.nomeEspaco || 'N/A'}</td>
       <td>${p.reserva?.cliente?.nome ?? ''} ${p.reserva?.cliente?.apelido ?? ''}</td>
       <td><strong class="amount">${formatMZN(p.valorPago)}</strong></td>
       <td>${formatDate(p.dataPagamento)}</td>
@@ -341,7 +341,7 @@ function filterData() {
   render(filtered);
 }
 
-// ── Consultas remotas — Capítulo 11 ──────────────────────
+// ── Consultas remotas - Capítulo 11 ──────────────────────
 
 /** GET /pagamento/{id} */
 async function consultarPorId() {
@@ -355,7 +355,7 @@ async function consultarPorId() {
     render(viewData);
   } catch (e) {
     viewData = [];
-    mostrarQueryInfo(`Pagamento #${id} — não encontrado`);
+    mostrarQueryInfo(`Pagamento #${id} - não encontrado`);
     updateStats([]);
     render([]);
   }
@@ -374,7 +374,7 @@ async function consultarPorData() {
   } catch (e) {
     // 404 = nenhum pagamento nessa data
     viewData = [];
-    mostrarQueryInfo(`Pagamentos de ${formatDate(data)} — nenhum encontrado`);
+    mostrarQueryInfo(`Pagamentos de ${formatDate(data)} - nenhum encontrado`);
     updateStats([]);
     render([]);
   }
@@ -459,6 +459,8 @@ async function save() {
     limparConsulta();
   } catch (e) {
     showModalAlert(e.message);
+  } finally {
+    // CORRIGIDO: btn sempre reactivado independentemente do fluxo
     btn.disabled = false;
   }
 }

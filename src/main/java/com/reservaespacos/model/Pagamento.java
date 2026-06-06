@@ -5,11 +5,6 @@ import jakarta.validation.constraints.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-/**
- * Entidade Pagamento.
- * Campos conforme especificacao:
- *   id, reserva_id, valor_pago, data_pagamento, metodo_pagamento
- */
 @Entity
 @Table(name = "pagamentos")
 public class Pagamento {

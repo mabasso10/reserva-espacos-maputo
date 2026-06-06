@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Espaços — ReservaEspaços Maputo</title>
+<title>Espaços - ReservaEspaços Maputo</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
@@ -36,7 +36,7 @@
   </nav>
   <div class="sidebar-footer">
     <div class="user-info"><div class="avatar" id="sidebar-avatar">?</div>
-      <div><div class="user-name" id="sidebar-name">—</div><div class="user-role" id="sidebar-role">—</div></div>
+      <div><div class="user-name" id="sidebar-name">-</div><div class="user-role" id="sidebar-role">-</div></div>
     </div>
     <button class="btn-logout" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i></button>
   </div>
@@ -70,7 +70,7 @@
           <option value="false">Indisponível</option>
         </select>
       </div>
-      <button class="btn-primary" onclick="openModal()">
+      <button id="btn-novo-espaco" class="btn-primary" onclick="openModal()">
         <i class="fa-solid fa-plus"></i> Novo Espaço
       </button>
     </div>
@@ -92,11 +92,15 @@
     <div class="modal-body">
       <div id="modal-alert" class="alert hidden"></div>
       <input type="hidden" id="edit-id"/>
-      <div class="form-row">
+      <!-- Campo de proprietário oculto — preenchido automaticamente pelo sistema -->
+      <input type="hidden" id="f-proprietarioId"/>
+      <!-- Linha do nome (ocupa linha inteira quando PROPRIETARIO, partilhada com select quando ADMIN) -->
+      <div class="form-row" id="row-nome-prop">
         <div class="form-group flex-2"><label>Nome do Espaço *</label><input type="text" id="f-nomeEspaco"/></div>
-        <div class="form-group">
+        <!-- ADMIN vê este select; PROPRIETARIO não vê -->
+        <div class="form-group" id="group-prop-select" style="display:none">
           <label>Proprietário *</label>
-          <select id="f-proprietarioId"></select>
+          <select id="f-proprietarioSelect"></select>
         </div>
       </div>
       <div class="form-group"><label>Descrição</label><textarea id="f-descricao" rows="3"></textarea></div>
@@ -116,6 +120,12 @@
           <select id="f-disponibilidade"><option value="true">Sim</option><option value="false">Não</option></select>
         </div>
       </div>
+      <div class="form-group">
+        <label>Fotos do Espaço <span id="foto-label-hint" style="font-weight:400;color:var(--text-muted)">(mín. 1, máx. 7 — ao criar)</span></label>
+        <input type="file" id="f-fotos" accept="image/*" multiple style="padding:6px 0"/>
+        <div id="foto-preview" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px"></div>
+        <small id="foto-count-msg" style="color:var(--text-muted)">Seleccione entre 1 e 7 imagens (JPG, PNG, WEBP, máx. 10 MB cada)</small>
+      </div>
     </div>
     <div class="modal-footer">
       <button class="btn-ghost" onclick="closeModal()">Cancelar</button>
@@ -132,26 +142,88 @@
 checkAuth(); initUI();
 let data = [], proprietarios = [];
 
+// ── Carregar dados iniciais ───────────────────────────────────────────────
 async function load() {
+  const grid = document.getElementById('espacos-grid');
+  grid.innerHTML = '<div class="loading-full"><i class="fa-solid fa-spinner fa-spin"></i> A carregar…</div>';
   try {
-    [data, proprietarios] = await Promise.all([API.get('/espaco'), API.get('/proprietario')]);
-    const sel = document.getElementById('f-proprietarioId');
-    sel.innerHTML = '<option value="">— Selecione um Proprietário —</option>' +
-      proprietarios.map(p => `<option value="${p.id}">${p.nome} ${p.apelido}</option>`).join('');
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const role = (user.role || '').toUpperCase();
+
+    // Sempre carregar os espaços primeiro — independente de qualquer outro erro
+    data = await API.get('/espaco');
+
+    if (role === 'ADMIN') {
+      // ADMIN: carregar lista de proprietários para o select do modal
+      try {
+        proprietarios = await API.get('/proprietario');
+        document.getElementById('group-prop-select').style.display = '';
+        const sel = document.getElementById('f-proprietarioSelect');
+        sel.innerHTML = '<option value="">- Selecione um Proprietário -</option>' +
+          proprietarios.map(p => `<option value="${p.id}">${p.nome} ${p.apelido}</option>`).join('');
+      } catch(_) { /* Se falhar, o select fica vazio mas os espaços aparecem */ }
+
+    } else if (role === 'PROPRIETARIO') {
+      // PROPRIETARIO: resolver o próprio perfil — erro aqui NÃO bloqueia a lista
+      let propId = user.proprietarioId;
+      if (!propId) {
+        try {
+          const prop = await API.get('/proprietario/me');
+          propId = prop.id;
+          user.proprietarioId = propId;
+          localStorage.setItem('user', JSON.stringify(user));
+          proprietarios = [prop];
+        } catch(_) {
+          // Perfil de proprietário ainda não criado — espaços aparecem na mesma
+          proprietarios = [];
+        }
+      } else {
+        try { proprietarios = [await API.get('/proprietario/' + propId)]; } catch(_) {}
+      }
+
+    } else {
+      // CLIENTE — só leitura, esconder botão "Novo Espaço"
+      document.getElementById('btn-novo-espaco').style.display = 'none';
+    }
+
     render(data);
   } catch(e) {
-    document.getElementById('espacos-grid').innerHTML = `<p class="error-msg">${e.message}</p>`;
+    grid.innerHTML = `<p class="error-msg">Erro ao carregar espaços: ${e.message}</p>`;
   }
 }
 
+// ── Renderização dos cards ────────────────────────────────────────────────
 function render(rows) {
   const grid = document.getElementById('espacos-grid');
-  if (!rows.length) { grid.innerHTML = '<p class="empty-full">Sem espaços encontrados</p>'; return; }
-  grid.innerHTML = rows.map(e => `
+  if (!rows || !rows.length) {
+    grid.innerHTML = '<p class="empty-full">Sem espaços encontrados</p>';
+    return;
+  }
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const role = (user.role || '').toUpperCase();
+  const myPropId = user.proprietarioId ? String(user.proprietarioId) : null;
+
+  grid.innerHTML = rows.map(e => {
+    // CORRIGIDO: mostrar foto real se existir; ícone apenas como fallback
+    const primeiraFoto = e.fotos && e.fotos.length > 0 ? e.fotos[0]
+                       : e.foto ? e.foto
+                       : null;
+    const imgHtml = primeiraFoto
+      ? `<img src="/uploads/${primeiraFoto}" alt="${e.nomeEspaco}"
+              style="width:100%;height:100%;object-fit:cover;border-radius:8px 8px 0 0;"
+              onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"
+         /><div class="espaco-icon" style="display:none"><i class="fa-solid fa-building"></i></div>`
+      : `<div class="espaco-icon"><i class="fa-solid fa-building"></i></div>`;
+
+    // CORRIGIDO: PROPRIETARIO vê Editar/Apagar apenas nos seus próprios espaços
+    const ePropId = e.proprietario ? String(e.proprietario.id) : null;
+    const podeEditar = role === 'ADMIN' || (role === 'PROPRIETARIO' && ePropId && ePropId === myPropId);
+
+    return `
     <div class="espaco-card ${e.disponibilidade ? '' : 'unavail'}">
-      <div class="espaco-card-header">
-        <div class="espaco-icon"><i class="fa-solid fa-building"></i></div>
-        <div class="espaco-badges">
+      <div class="espaco-card-header" style="position:relative;min-height:120px;overflow:hidden;">
+        ${imgHtml}
+        <div class="espaco-badges" style="position:absolute;top:8px;right:8px;">
           <span class="badge tipo">${e.tipoEvento}</span>
           <span class="badge ${e.disponibilidade ? 'disp' : 'indisp'}">${e.disponibilidade ? 'Disponível' : 'Indisponível'}</span>
         </div>
@@ -167,78 +239,228 @@ function render(rows) {
         <i class="fa-solid fa-user-tie"></i>
         ${e.proprietario ? e.proprietario.nome + ' ' + e.proprietario.apelido : 'N/A'}
       </div>
+      ${podeEditar ? `
       <div class="card-actions">
         <button class="btn-icon edit" onclick="openModal(${e.id})"><i class="fa-solid fa-pen-to-square"></i> Editar</button>
         <button class="btn-icon del" onclick="del(${e.id},'${e.nomeEspaco}')"><i class="fa-solid fa-trash"></i></button>
-      </div>
-    </div>`).join('');
+      </div>` : ''}
+    </div>`;
+  }).join('');
 }
 
+// ── Filtros locais ────────────────────────────────────────────────────────
 function filterData() {
-  const q = document.getElementById('search').value.toLowerCase();
+  const q    = document.getElementById('search').value.toLowerCase();
   const tipo = document.getElementById('filter-tipo').value;
   const disp = document.getElementById('filter-disp').value;
   render(data.filter(e =>
-    (!q || `${e.nomeEspaco} ${e.bairro} ${e.tipoEvento}`.toLowerCase().includes(q)) &&
+    (!q    || `${e.nomeEspaco} ${e.bairro} ${e.tipoEvento}`.toLowerCase().includes(q)) &&
     (!tipo || e.tipoEvento === tipo) &&
     (disp === '' || String(e.disponibilidade) === disp)
   ));
 }
 
-function openModal(id) {
+// ── Preview de fotos seleccionadas ────────────────────────────────────────
+document.getElementById('f-fotos').addEventListener('change', function() {
+  const files = Array.from(this.files);
+  const prev  = document.getElementById('foto-preview');
+  const msg   = document.getElementById('foto-count-msg');
+  prev.innerHTML = '';
+
+  if (files.length > 7) {
+    msg.style.color = 'var(--danger)';
+    msg.textContent = `Máximo 7 fotos — seleccionou ${files.length}. Remova algumas.`;
+    return;
+  }
+
+  files.forEach(f => {
+    const url = URL.createObjectURL(f);
+    const img = document.createElement('img');
+    img.src = url;
+    img.style.cssText = 'width:72px;height:72px;object-fit:cover;border-radius:8px;border:2px solid var(--border)';
+    prev.appendChild(img);
+  });
+
+  const isNew = !document.getElementById('edit-id').value;
+  if (isNew && files.length < 1) {
+    msg.style.color = 'var(--danger)';
+    msg.textContent = `Seleccione pelo menos 1 foto.`;
+  } else {
+    msg.style.color = 'var(--text-muted)';
+    msg.textContent = `${files.length} foto(s) seleccionada(s).`;
+  }
+});
+
+// ── Abrir modal ───────────────────────────────────────────────────────────
+async function openModal(id) {
+  // Limpar estado anterior
   clearForm(['f-nomeEspaco','f-descricao','f-bairro','f-capacidade','f-precoReserva']);
   document.getElementById('edit-id').value = '';
   document.getElementById('f-proprietarioId').value = '';
-  document.getElementById('modal-title').textContent = 'Novo Espaço';
+  document.getElementById('f-fotos').value = '';
+  document.getElementById('foto-preview').innerHTML = '';
+  document.getElementById('foto-count-msg').textContent = 'Seleccione entre 1 e 7 imagens (JPG, PNG, WEBP, máx. 10 MB cada)';
+  document.getElementById('foto-count-msg').style.color = 'var(--text-muted)';
+  document.getElementById('modal-title').textContent = id ? 'Editar Espaço' : 'Novo Espaço';
+  document.getElementById('foto-label-hint').textContent = id ? '(opcional ao editar)' : '(mín. 1, máx. 7 — ao criar)';
   hideModalAlert();
+
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const role = (user.role || '').toUpperCase();
+
+  // ── Resolver proprietarioId para PROPRIETARIO ─────────────────────────
+  if (role === 'PROPRIETARIO') {
+    let propId = user.proprietarioId || (proprietarios.length > 0 ? proprietarios[0].id : null);
+
+    if (!propId) {
+      // Último recurso: buscar /proprietario/me
+      try {
+        const prop = await API.get('/proprietario/me');
+        propId = prop.id;
+        user.proprietarioId = propId;
+        localStorage.setItem('user', JSON.stringify(user));
+        proprietarios = [prop];
+      } catch(_) {
+        showModalAlert('Perfil de proprietário não encontrado. Complete o registo em "Proprietários" antes de adicionar espaços.');
+        document.getElementById('modal').classList.add('show');
+        return;
+      }
+    }
+    document.getElementById('f-proprietarioId').value = propId;
+  }
+
+  // ── Modo edição: preencher campos ─────────────────────────────────────
   if (id) {
     const e = data.find(x => x.id === id);
     if (!e) return;
-    document.getElementById('edit-id').value = e.id;
-    document.getElementById('modal-title').textContent = 'Editar Espaço';
-    document.getElementById('f-nomeEspaco').value = e.nomeEspaco;
-    document.getElementById('f-descricao').value = e.descricao || '';
-    document.getElementById('f-bairro').value = e.bairro;
-    document.getElementById('f-tipoEvento').value = e.tipoEvento;
-    document.getElementById('f-capacidade').value = e.capacidade;
+    document.getElementById('edit-id').value       = e.id;
+    document.getElementById('f-nomeEspaco').value  = e.nomeEspaco;
+    document.getElementById('f-descricao').value   = e.descricao || '';
+    document.getElementById('f-bairro').value      = e.bairro;
+    document.getElementById('f-tipoEvento').value  = e.tipoEvento;
+    document.getElementById('f-capacidade').value  = e.capacidade;
     document.getElementById('f-precoReserva').value = e.precoReserva;
     document.getElementById('f-disponibilidade').value = String(e.disponibilidade);
-    if (e.proprietario) document.getElementById('f-proprietarioId').value = e.proprietario.id;
+
+    if (role === 'ADMIN' && e.proprietario) {
+      document.getElementById('f-proprietarioSelect').value = e.proprietario.id;
+      document.getElementById('f-proprietarioId').value = e.proprietario.id;
+    } else if (e.proprietario) {
+      document.getElementById('f-proprietarioId').value = e.proprietario.id;
+    }
   }
+
   document.getElementById('modal').classList.add('show');
 }
 
+// ── Guardar espaço ────────────────────────────────────────────────────────
 async function save() {
   const btn = document.getElementById('btn-save');
-  btn.disabled = true; hideModalAlert();
-  const id = document.getElementById('edit-id').value;
-  const propId = document.getElementById('f-proprietarioId').value;
+  btn.disabled = true;
+  hideModalAlert();
+
+  const id   = document.getElementById('edit-id').value;
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const role = (user.role || '').toUpperCase();
+
+  // Resolver proprietarioId
+  let propId = document.getElementById('f-proprietarioId').value;
+  if (role === 'ADMIN') {
+    propId = document.getElementById('f-proprietarioSelect').value;
+    document.getElementById('f-proprietarioId').value = propId;
+  } else if (role === 'PROPRIETARIO' && !propId) {
+    if (proprietarios.length > 0) {
+      propId = String(proprietarios[0].id);
+    } else {
+      try {
+        const prop = await API.get('/proprietario/me');
+        propId = String(prop.id);
+        user.proprietarioId = prop.id;
+        localStorage.setItem('user', JSON.stringify(user));
+        proprietarios = [prop];
+      } catch(_) {}
+    }
+    document.getElementById('f-proprietarioId').value = propId;
+  }
 
   if (!propId) {
-    showModalAlert('Seleccione um Proprietário.');
-    btn.disabled = false; return;
+    showModalAlert(role === 'ADMIN'
+      ? 'Seleccione um Proprietário.'
+      : 'Perfil de proprietário não encontrado. Complete o registo em "Proprietários" antes de adicionar espaços.');
+    btn.disabled = false;
+    return;
+  }
+
+  // Validar fotos
+  const fotosInput = document.getElementById('f-fotos');
+  const fotos = Array.from(fotosInput.files || []);
+  if (!id && fotos.length < 1) {
+    showModalAlert('Adicione pelo menos 1 foto do espaço.');
+    btn.disabled = false;
+    return;
+  }
+  if (fotos.length > 7) {
+    showModalAlert('Máximo permitido é 7 fotos.');
+    btn.disabled = false;
+    return;
   }
 
   const body = {
-    proprietarioId: parseInt(propId),
-    nomeEspaco: document.getElementById('f-nomeEspaco').value.trim(),
-    descricao: document.getElementById('f-descricao').value.trim(),
-    bairro: document.getElementById('f-bairro').value.trim(),
-    tipoEvento: document.getElementById('f-tipoEvento').value,
-    capacidade: parseInt(document.getElementById('f-capacidade').value),
-    precoReserva: parseFloat(document.getElementById('f-precoReserva').value),
+    proprietarioId : parseInt(propId),
+    nomeEspaco     : document.getElementById('f-nomeEspaco').value.trim(),
+    descricao      : document.getElementById('f-descricao').value.trim(),
+    bairro         : document.getElementById('f-bairro').value.trim(),
+    tipoEvento     : document.getElementById('f-tipoEvento').value,
+    capacidade     : parseInt(document.getElementById('f-capacidade').value),
+    precoReserva   : parseFloat(document.getElementById('f-precoReserva').value),
     disponibilidade: document.getElementById('f-disponibilidade').value === 'true'
   };
+
+  if (!body.nomeEspaco || !body.bairro || isNaN(body.capacidade) || isNaN(body.precoReserva)) {
+    showModalAlert('Preencha todos os campos obrigatórios.');
+    btn.disabled = false;
+    return;
+  }
+
   try {
-    if (id) await API.put(`/espaco/${id}`, body);
-    else await API.post('/espaco', body);
-    closeModal(); load();
-  } catch(e) { showModalAlert(e.message); btn.disabled = false; }
+    let savedEspaco;
+    if (id) {
+      savedEspaco = await API.put(`/espaco/${id}`, body);
+    } else {
+      savedEspaco = await API.post('/espaco', body);
+    }
+    const espacoId = savedEspaco?.id || id;
+
+    // Upload das fotos uma a uma — acumulativo (backend já não sobrescreve)
+    if (fotos.length > 0 && espacoId) {
+      let fotosFailed = 0;
+      for (const foto of fotos) {
+        const fd = new FormData();
+        fd.append('arquivo', foto);
+        try { await API.upload(`/espaco/${espacoId}/foto`, fd); }
+        catch(_) { fotosFailed++; }
+      }
+      if (fotosFailed > 0) {
+        showModalAlert(`Espaço guardado, mas ${fotosFailed} foto(s) não foram enviadas. Pode tentar novamente ao editar.`);
+        load();
+        return;  // btn.disabled reactivado no finally
+      }
+    }
+
+    closeModal();
+    load();
+  } catch(e) {
+    showModalAlert(e.message);
+  } finally {
+    // CORRIGIDO: btn sempre reactivado — mesmo se save() lançar excepção inesperada
+    btn.disabled = false;
+  }
 }
 
+// ── Eliminar espaço ───────────────────────────────────────────────────────
 async function del(id, nome) {
   if (!confirm(`Eliminar o espaço "${nome}"?`)) return;
-  try { await API.del('/espaco/'+id); load(); }
+  try { await API.del('/espaco/' + id); load(); }
   catch(e) { alert('Erro: ' + e.message); }
 }
 
